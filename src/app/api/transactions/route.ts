@@ -9,30 +9,46 @@ function parseDateToComparable(dateStr: string): number {
   return parseInt(y + m.padStart(2, "0") + d.padStart(2, "0"), 10);
 }
 
+function filterByRange(
+  transactions: Transaction[],
+  startDate: string | null,
+  endDate: string | null,
+  categories: string[]
+): Transaction[] {
+  let result = transactions;
+  if (categories.length > 0) {
+    const set = new Set(categories);
+    result = result.filter((t) => set.has(t.category));
+  }
+  if (startDate) {
+    const start = parseDateToComparable(startDate);
+    result = result.filter((t) => parseDateToComparable(t.date) >= start);
+  }
+  if (endDate) {
+    const end = parseDateToComparable(endDate);
+    result = result.filter((t) => parseDateToComparable(t.date) <= end);
+  }
+  return result;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const categories = searchParams.getAll("category");
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
+    const compareStart = searchParams.get("compareStart");
+    const compareEnd = searchParams.get("compareEnd");
 
-    let transactions: Transaction[] = loadTransactionsFromCsv({ includeTumList: false });
+    const allTransactions: Transaction[] = loadTransactionsFromCsv({ includeTumList: false });
+    const current = filterByRange(allTransactions, startDate, endDate, categories);
 
-    if (categories.length > 0) {
-      const set = new Set(categories);
-      transactions = transactions.filter((t) => set.has(t.category));
+    if (compareStart && compareEnd) {
+      const compare = filterByRange(allTransactions, compareStart, compareEnd, categories);
+      return NextResponse.json({ current, compare });
     }
 
-    if (startDate) {
-      const start = parseDateToComparable(startDate);
-      transactions = transactions.filter((t) => parseDateToComparable(t.date) >= start);
-    }
-    if (endDate) {
-      const end = parseDateToComparable(endDate);
-      transactions = transactions.filter((t) => parseDateToComparable(t.date) <= end);
-    }
-
-    return NextResponse.json(transactions);
+    return NextResponse.json(current);
   } catch (e) {
     console.error("Transactions API error:", e);
     return NextResponse.json({ error: "Failed to load transactions" }, { status: 500 });

@@ -3,11 +3,13 @@ export function KPICard({
   label,
   value,
   sub,
+  changePct,
 }: {
   icon: string;
   label: string;
   value: string | number;
   sub?: string;
+  changePct?: number | null;
 }) {
   return (
     <div
@@ -32,8 +34,22 @@ export function KPICard({
       >
         {label}
       </div>
-      <div style={{ fontSize: 26, fontWeight: 700, color: "#00f5d4", lineHeight: 1.2 }}>
-        {value}
+      <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+        <div style={{ fontSize: 26, fontWeight: 700, color: "#00f5d4", lineHeight: 1.2 }}>
+          {value}
+        </div>
+        {changePct != null && (
+          <span
+            style={{
+              fontSize: 13,
+              fontWeight: 700,
+              color: changePct > 0 ? "#ef476f" : changePct < 0 ? "#06d6a0" : "#888",
+            }}
+          >
+            {changePct > 0 ? "+" : ""}
+            {changePct.toFixed(1)}%
+          </span>
+        )}
       </div>
       {sub && <div style={{ fontSize: 12, color: "#666", marginTop: 4 }}>{sub}</div>}
     </div>

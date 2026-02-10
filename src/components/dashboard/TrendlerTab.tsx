@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   BarChart,
   Bar,
@@ -14,6 +15,7 @@ import {
 } from "recharts";
 import { ChartCard } from "./ChartCard";
 import { CustomTooltip } from "./CustomTooltip";
+import { DrillDownModal } from "./DrillDownModal";
 import { CHART_COLORS } from "@/constants/charts";
 import type { Transaction } from "@/types/transaction";
 
@@ -24,6 +26,8 @@ export interface TrendlerTabProps {
 }
 
 export function TrendlerTab({ dailyData, weeklyData, transactions }: TrendlerTabProps) {
+  const [drillDown, setDrillDown] = useState<{ title: string; items: Transaction[] } | null>(null);
+
   const cumulativeData = dailyData.reduce(
     (acc, d) => {
       const prev = acc.length ? acc[acc.length - 1].cumulative : 0;
@@ -45,6 +49,27 @@ export function TrendlerTab({ dailyData, weeklyData, transactions }: TrendlerTab
     return { ...w, count: weekTxs.length };
   });
 
+  const handleDailyClick = (idx: number) => {
+    const entry = dailyData[idx];
+    if (!entry?.date) return;
+    const filtered = transactions.filter((t) => t.date === entry.date);
+    setDrillDown({ title: `Tarih: ${entry.date}`, items: filtered });
+  };
+
+  const handleWeeklyClick = (idx: number) => {
+    const entry = weeklyData[idx];
+    if (!entry?.name) return;
+    const filtered = transactions.filter((t) => {
+      const day = parseInt(t.date.split(".")[0], 10);
+      if (entry.name.includes("1-5")) return day <= 5;
+      if (entry.name.includes("6-12")) return day >= 6 && day <= 12;
+      if (entry.name.includes("13-19")) return day >= 13 && day <= 19;
+      if (entry.name.includes("20-26")) return day >= 20 && day <= 26;
+      return day >= 27;
+    });
+    setDrillDown({ title: entry.name, items: filtered });
+  };
+
   return (
     <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
       <ChartCard title="Günlük Harcama Trendi (Detaylı)" fullWidth>
@@ -63,7 +88,13 @@ export function TrendlerTab({ dailyData, weeklyData, transactions }: TrendlerTab
               tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="total" name="Harcama" radius={[4, 4, 0, 0]}>
+            <Bar
+              dataKey="total"
+              name="Harcama"
+              radius={[4, 4, 0, 0]}
+              onClick={(_: unknown, idx: number) => handleDailyClick(idx)}
+              cursor="pointer"
+            >
               {dailyData.map((_, i) => (
                 <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
               ))}
@@ -118,10 +149,25 @@ export function TrendlerTab({ dailyData, weeklyData, transactions }: TrendlerTab
             />
             <YAxis tick={{ fill: "#888", fontSize: 11 }} />
             <Tooltip content={<CustomTooltip formatter={(v) => `${v} işlem`} />} />
-            <Bar dataKey="count" name="İşlem Sayısı" fill="#9b5de5" radius={[6, 6, 0, 0]} />
+            <Bar
+              dataKey="count"
+              name="İşlem Sayısı"
+              fill="#9b5de5"
+              radius={[6, 6, 0, 0]}
+              onClick={(_: unknown, idx: number) => handleWeeklyClick(idx)}
+              cursor="pointer"
+            />
           </BarChart>
         </ResponsiveContainer>
       </ChartCard>
+
+      {drillDown && (
+        <DrillDownModal
+          title={drillDown.title}
+          items={drillDown.items}
+          onClose={() => setDrillDown(null)}
+        />
+      )}
     </div>
   );
 }

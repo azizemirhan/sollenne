@@ -6,3 +6,4 @@ export { KategoriTab } from "./KategoriTab";
 export { TedarikciTab } from "./TedarikciTab";
 export { TrendlerTab } from "./TrendlerTab";
 export { AnomaliTab } from "./AnomaliTab";
+export { DrillDownModal } from "./DrillDownModal";

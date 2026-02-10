@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   BarChart,
   Bar,
@@ -12,15 +13,28 @@ import {
 } from "recharts";
 import { ChartCard } from "./ChartCard";
 import { CustomTooltip } from "./CustomTooltip";
+import { DrillDownModal } from "./DrillDownModal";
 import { formatFull, formatCurrency } from "@/lib/format";
 import { CHART_COLORS } from "@/constants/charts";
+import { getCategoryLabel } from "@/constants/categories";
+import type { Transaction } from "@/types/transaction";
 
 export interface KategoriTabProps {
   categoryData: Array<{ name: string; value: number }>;
   totalSpend: number;
+  transactions: Transaction[];
 }
 
-export function KategoriTab({ categoryData, totalSpend }: KategoriTabProps) {
+export function KategoriTab({ categoryData, totalSpend, transactions }: KategoriTabProps) {
+  const [drillDown, setDrillDown] = useState<{ title: string; items: Transaction[] } | null>(null);
+
+  const handleBarClick = (idx: number) => {
+    const entry = categoryData[idx];
+    if (!entry?.name) return;
+    const filtered = transactions.filter((t) => getCategoryLabel(t.category) === entry.name);
+    setDrillDown({ title: `Kategori: ${entry.name}`, items: filtered });
+  };
+
   return (
     <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
       <ChartCard title="Kategori Harcama Sıralaması" fullWidth>
@@ -39,7 +53,13 @@ export function KategoriTab({ categoryData, totalSpend }: KategoriTabProps) {
               width={140}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="value" name="Harcama" radius={[0, 6, 6, 0]}>
+            <Bar
+              dataKey="value"
+              name="Harcama"
+              radius={[0, 6, 6, 0]}
+              onClick={(_: unknown, idx: number) => handleBarClick(idx)}
+              cursor="pointer"
+            >
               {categoryData.map((_, i) => (
                 <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
               ))}
@@ -60,6 +80,7 @@ export function KategoriTab({ categoryData, totalSpend }: KategoriTabProps) {
             return (
               <div
                 key={i}
+                onClick={() => handleBarClick(i)}
                 style={{
                   background: "#161625",
                   borderRadius: 8,
@@ -67,7 +88,11 @@ export function KategoriTab({ categoryData, totalSpend }: KategoriTabProps) {
                   display: "flex",
                   alignItems: "center",
                   gap: 12,
+                  cursor: "pointer",
+                  transition: "background 0.2s",
                 }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "#1e1e35")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "#161625")}
               >
                 <div
                   style={{
@@ -109,6 +134,14 @@ export function KategoriTab({ categoryData, totalSpend }: KategoriTabProps) {
           })}
         </div>
       </ChartCard>
+
+      {drillDown && (
+        <DrillDownModal
+          title={drillDown.title}
+          items={drillDown.items}
+          onClose={() => setDrillDown(null)}
+        />
+      )}
     </div>
   );
 }

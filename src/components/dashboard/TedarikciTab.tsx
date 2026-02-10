@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   BarChart,
   Bar,
@@ -12,15 +13,20 @@ import {
 } from "recharts";
 import { ChartCard } from "./ChartCard";
 import { CustomTooltip } from "./CustomTooltip";
+import { DrillDownModal } from "./DrillDownModal";
 import { formatFull } from "@/lib/format";
 import { CHART_COLORS } from "@/constants/charts";
+import type { Transaction } from "@/types/transaction";
 
 export interface TedarikciTabProps {
   supplierData: Array<{ name: string; value: number; pct: string }>;
   totalSpend: number;
+  transactions: Transaction[];
 }
 
-export function TedarikciTab({ supplierData, totalSpend }: TedarikciTabProps) {
+export function TedarikciTab({ supplierData, totalSpend, transactions }: TedarikciTabProps) {
+  const [drillDown, setDrillDown] = useState<{ title: string; items: Transaction[] } | null>(null);
+
   const top3Share = totalSpend
     ? (
         (supplierData
@@ -30,6 +36,18 @@ export function TedarikciTab({ supplierData, totalSpend }: TedarikciTabProps) {
         100
       ).toFixed(1)
     : "0";
+
+  const handleBarClick = (idx: number) => {
+    const entry = supplierData.slice(0, 10)[idx];
+    if (!entry?.name) return;
+    const filtered = transactions.filter((t) => t.supplier === entry.name);
+    setDrillDown({ title: `Tedarikçi: ${entry.name}`, items: filtered });
+  };
+
+  const handleCardClick = (supplierName: string) => {
+    const filtered = transactions.filter((t) => t.supplier === supplierName);
+    setDrillDown({ title: `Tedarikçi: ${supplierName}`, items: filtered });
+  };
 
   return (
     <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
@@ -51,7 +69,13 @@ export function TedarikciTab({ supplierData, totalSpend }: TedarikciTabProps) {
               width={180}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="value" name="Harcama" radius={[0, 6, 6, 0]}>
+            <Bar
+              dataKey="value"
+              name="Harcama"
+              radius={[0, 6, 6, 0]}
+              onClick={(_: unknown, idx: number) => handleBarClick(idx)}
+              cursor="pointer"
+            >
               {supplierData.slice(0, 10).map((_, i) => (
                 <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
               ))}
@@ -92,6 +116,7 @@ export function TedarikciTab({ supplierData, totalSpend }: TedarikciTabProps) {
             {supplierData.slice(0, 15).map((s, i) => (
               <div
                 key={i}
+                onClick={() => handleCardClick(s.name)}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -99,7 +124,11 @@ export function TedarikciTab({ supplierData, totalSpend }: TedarikciTabProps) {
                   padding: "8px 12px",
                   background: "#161625",
                   borderRadius: 8,
+                  cursor: "pointer",
+                  transition: "background 0.2s",
                 }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "#1e1e35")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "#161625")}
               >
                 <div
                   style={{
@@ -152,6 +181,14 @@ export function TedarikciTab({ supplierData, totalSpend }: TedarikciTabProps) {
           </div>
         </div>
       </ChartCard>
+
+      {drillDown && (
+        <DrillDownModal
+          title={drillDown.title}
+          items={drillDown.items}
+          onClose={() => setDrillDown(null)}
+        />
+      )}
     </div>
   );
 }
