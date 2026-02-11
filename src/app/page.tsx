@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import Image from "next/image";
 import { getCategoryLabel } from "@/constants/categories";
 import type { Transaction } from "@/types/transaction";
 import type { BudgetInfo } from "@/components/dashboard/GenelTab";
@@ -11,6 +12,28 @@ import {
   TrendlerTab,
   AnomaliTab,
 } from "@/components/dashboard";
+import {
+  Calendar,
+  Package,
+  RotateCcw,
+  ChevronDown,
+  BarChart3,
+  Boxes,
+  Building2,
+  TrendingUp,
+  AlertTriangle,
+  FileSpreadsheet,
+  FileText,
+  FileDown,
+  Wallet,
+  Check,
+  X,
+  Filter,
+  Download,
+  RefreshCw,
+  BookOpen,
+} from "lucide-react";
+import { QUICK_REPORT_TITLE, QUICK_REPORT_CONTENT } from "@/constants/quickReport";
 
 /* ─── helpers ─── */
 
@@ -87,7 +110,7 @@ async function exportPdf(containerId: string, title: string) {
   const jsPDF = jspdfModule.jsPDF || jspdfModule.default;
   const el = document.getElementById(containerId);
   if (!el) return;
-  const canvas = await html2canvas(el, { backgroundColor: "#12121e", scale: 2 });
+  const canvas = await html2canvas(el, { backgroundColor: "#FFFFFF", scale: 2 });
   const imgData = canvas.toDataURL("image/png");
   const pdf = new jsPDF("p", "mm", "a4");
   const pageWidth = pdf.internal.pageSize.getWidth();
@@ -100,7 +123,6 @@ async function exportPdf(containerId: string, title: string) {
   if (imgHeight <= pageHeight) {
     pdf.addImage(imgData, "PNG", 10, y, imgWidth, imgHeight);
   } else {
-    // multi-page
     let srcY = 0;
     while (srcY < canvas.height) {
       const sliceHeight = Math.min(
@@ -111,7 +133,7 @@ async function exportPdf(containerId: string, title: string) {
       sliceCanvas.width = canvas.width;
       sliceCanvas.height = sliceHeight;
       const ctx = sliceCanvas.getContext("2d")!;
-      ctx.drawImage(canvas, 0, srcY, canvas.width, sliceHeight, 0, 0, canvas.width, sliceHeight);
+      ctx.drawImage(canvas, 0, srcY, canvas.width, sliceHeight, 0, 0, sliceCanvas.width, sliceHeight);
       const sliceImg = sliceCanvas.toDataURL("image/png");
       const sliceImgHeight = (sliceHeight * imgWidth) / canvas.width;
       if (srcY > 0) pdf.addPage();
@@ -176,47 +198,13 @@ const MONTH_OPTIONS = (() => {
   return months;
 })();
 
-/* ─── component styles ─── */
-const inputStyle: React.CSSProperties = {
-  padding: "6px 10px",
-  borderRadius: 8,
-  border: "1px solid #333",
-  background: "#1e1e2e",
-  color: "#e0e0e0",
-  fontSize: 12,
-};
-
-const chipStyle = (active: boolean): React.CSSProperties => ({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: 4,
-  padding: "4px 10px",
-  borderRadius: 14,
-  fontSize: 11,
-  fontWeight: 600,
-  cursor: "pointer",
-  border: active ? "1px solid #00f5d4" : "1px solid #333",
-  background: active ? "#00f5d420" : "#1e1e2e",
-  color: active ? "#00f5d4" : "#888",
-  transition: "all 0.15s",
-});
-
-const btnStyle: React.CSSProperties = {
-  padding: "6px 14px",
-  borderRadius: 8,
-  border: "none",
-  fontSize: 12,
-  fontWeight: 600,
-  cursor: "pointer",
-};
-
-/* ─── tabs ─── */
+/* ─── tabs with icons ─── */
 const TABS = [
-  { id: "genel", label: "Genel Bakış", icon: "📊" },
-  { id: "kategori", label: "Kategoriler", icon: "📦" },
-  { id: "tedarikci", label: "Tedarikçiler", icon: "🏢" },
-  { id: "trendler", label: "Trendler", icon: "📈" },
-  { id: "anomali", label: "Anomaliler", icon: "⚠️" },
+  { id: "genel", label: "Genel Bakış", Icon: BarChart3 },
+  { id: "kategori", label: "Kategoriler", Icon: Boxes },
+  { id: "tedarikci", label: "Tedarikçiler", Icon: Building2 },
+  { id: "trendler", label: "Trendler", Icon: TrendingUp },
+  { id: "anomali", label: "Anomaliler", Icon: AlertTriangle },
 ];
 
 export default function Dashboard() {
@@ -234,6 +222,7 @@ export default function Dashboard() {
   const [endDate, setEndDate] = useState("31.01.2026");
   const [dateError, setDateError] = useState<string | null>(null);
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
 
   /* ─── comparison state ─── */
   const [compareMode, setCompareMode] = useState("");
@@ -537,28 +526,28 @@ export default function Dashboard() {
     return (
       <div
         style={{
-          background: "#12121e",
+          background: "#FFFFFF",
           minHeight: "100vh",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          color: "#888",
+          color: "#6B6560",
           flexDirection: "column",
-          gap: 12,
+          gap: 16,
         }}
       >
         <div
           style={{
-            width: 40,
-            height: 40,
-            border: "3px solid #333",
-            borderTopColor: "#00f5d4",
+            width: 48,
+            height: 48,
+            border: "3px solid #E5E0D8",
+            borderTopColor: "#AA5930",
             borderRadius: "50%",
             animation: "spin 0.8s linear infinite",
           }}
         />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-        Yükleniyor...
+        <span style={{ fontSize: 16, fontWeight: 500 }}>Yükleniyor...</span>
       </div>
     );
   }
@@ -566,347 +555,591 @@ export default function Dashboard() {
   return (
     <div
       style={{
-        background: "#12121e",
+        background: "#F8F6F3",
         minHeight: "100vh",
-        color: "#e0e0e0",
+        color: "#2D2A26",
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
       }}
     >
+      {/* ─── Top accent bar ─── */}
       <div
         style={{
           height: 4,
-          background: "linear-gradient(90deg, #f15bb5, #fee440, #00f5d4, #00bbf9, #9b5de5)",
+          background: "linear-gradient(90deg, #AA5930, #D8BF9F, #AA5930)",
         }}
       />
 
       {/* ─── Header ─── */}
-      <div style={{ background: "#1a1a2e", padding: "32px 24px 24px", textAlign: "center" }}>
-        <h1 style={{ margin: 0, fontSize: 32, fontWeight: 800, color: "#00f5d4" }}>
-          🏭 {periodTitle}
-        </h1>
-        <p style={{ margin: "8px 0 0", color: "#888", fontSize: 14 }}>
-          Kapsamlı veri analizi ve görselleştirme raporu
-        </p>
-        <div
-          style={{
-            display: "inline-block",
-            background: "#00f5d4",
-            color: "#12121e",
-            padding: "6px 20px",
-            borderRadius: 20,
-            fontWeight: 700,
-            fontSize: 14,
-            marginTop: 12,
-          }}
-        >
-          {periodBadge}
-        </div>
-      </div>
-
-      {/* ─── Filter bar ─── */}
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 12,
-          padding: "16px 24px",
-          background: "#161625",
-          alignItems: "flex-start",
-        }}
-      >
-        {/* Date filters */}
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
-          <span style={{ fontSize: 12, color: "#888", fontWeight: 600 }}>Filtreler:</span>
-
-          <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ fontSize: 12, color: "#aaa" }}>Başlangıç</span>
-            <input
-              type="date"
-              value={toIsoDate(startDate)}
-              onChange={(e) => setStartDate(fromIsoDate(e.target.value))}
-              style={{ ...inputStyle, width: 130 }}
+      <header style={{ background: "#FFFFFF", borderBottom: "1px solid #E5E0D8" }}>
+        <div className="dashboard-header-inner">
+          {/* Logo & Title */}
+          <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
+            <Image
+              src="/logo.png"
+              alt="Solenne"
+              width={160}
+              height={50}
+              style={{ objectFit: "contain", height: 45, width: "auto" }}
+              priority
             />
-          </label>
-          <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ fontSize: 12, color: "#aaa" }}>Bitiş</span>
-            <input
-              type="date"
-              value={toIsoDate(endDate)}
-              onChange={(e) => setEndDate(fromIsoDate(e.target.value))}
-              style={{ ...inputStyle, width: 130 }}
-            />
-          </label>
-
-          {/* Period selector */}
-          <select
-            value=""
-            onChange={(e) => {
-              const val = e.target.value;
-              if (!val) return;
-              const [y, m] = val.split("-").map(Number);
-              handleMonthSelect(y, m);
-            }}
-            style={{ ...inputStyle, width: 140 }}
-          >
-            <option value="">Dönem seç...</option>
-            {MONTH_OPTIONS.map((opt) => (
-              <option key={`${opt.year}-${opt.month}`} value={`${opt.year}-${opt.month}`}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Date presets */}
-        <div style={{ display: "flex", gap: 4, flexWrap: "wrap", alignItems: "center" }}>
-          {DATE_PRESETS.map((preset) => (
-            <button
-              key={preset.label}
-              onClick={() => {
-                const r = preset.getRange();
-                setStartDate(r.start);
-                setEndDate(r.end);
-              }}
-              style={{
-                ...btnStyle,
-                background: "#1e1e2e",
-                color: "#aaa",
-                border: "1px solid #333",
-                fontSize: 11,
-                padding: "4px 10px",
-              }}
-            >
-              {preset.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Category filter */}
-        <div ref={categoryRef} style={{ position: "relative" }}>
-          <button
-            onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
+            <div>
+              <h1 style={{ margin: 0, fontSize: "clamp(18px, 4vw, 24px)", fontWeight: 700, color: "#2D2A26" }}>
+                {periodTitle}
+              </h1>
+              <p style={{ margin: "4px 0 0", color: "#9B9590", fontSize: 14 }}>
+                Kapsamlı veri analizi ve görselleştirme raporu
+              </p>
+            </div>
+          </div>
+          
+          {/* Period badge */}
+          <div
             style={{
-              ...btnStyle,
-              background: "#1e1e2e",
-              color: "#aaa",
-              border: "1px solid #333",
+              background: "#AA5930",
+              color: "#FFFFFF",
+              padding: "8px 16px",
+              borderRadius: 20,
+              fontWeight: 600,
+              fontSize: 14,
               display: "flex",
               alignItems: "center",
-              gap: 6,
+              gap: 8,
+              alignSelf: "flex-start",
             }}
           >
-            📦 Kategoriler{" "}
-            {filterCategories.length > 0 && (
-              <span
+            <Calendar size={16} />
+            {periodBadge}
+          </div>
+        </div>
+      </header>
+
+      {/* ─── Filter Bar ─── */}
+      <div style={{ background: "#FFFFFF", borderBottom: "1px solid #E5E0D8" }}>
+        <div className="dashboard-filter-bar">
+          {/* Row 1: Date Filters & Presets */}
+          <div className="dashboard-filter-row-1">
+            {/* Date Range */}
+            <div className="dashboard-date-range-group">
+              <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#6B6560", fontSize: 13, fontWeight: 600 }}>
+                <Calendar size={14} />
+                Tarih Aralığı
+              </div>
+              <div className="dashboard-filter-date-inputs">
+                <input
+                  type="date"
+                  value={toIsoDate(startDate)}
+                  onChange={(e) => setStartDate(fromIsoDate(e.target.value))}
+                  style={{
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    border: "1px solid #E5E0D8",
+                    background: "#FFFFFF",
+                    color: "#2D2A26",
+                    fontSize: 13,
+                    outline: "none",
+                    minWidth: 130,
+                    width: "100%",
+                    maxWidth: 160,
+                    boxSizing: "border-box",
+                  }}
+                />
+                <span style={{ color: "#9B9590", flexShrink: 0 }}>—</span>
+                <input
+                  type="date"
+                  value={toIsoDate(endDate)}
+                  onChange={(e) => setEndDate(fromIsoDate(e.target.value))}
+                  style={{
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    border: "1px solid #E5E0D8",
+                    background: "#FFFFFF",
+                    color: "#2D2A26",
+                    fontSize: 13,
+                    outline: "none",
+                    minWidth: 130,
+                    width: "100%",
+                    maxWidth: 160,
+                    boxSizing: "border-box",
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Dönem seç + Quick Presets */}
+            <div className="dashboard-filter-period-group">
+              <select
+                value=""
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (!val) return;
+                  const [y, m] = val.split("-").map(Number);
+                  handleMonthSelect(y, m);
+                }}
                 style={{
-                  background: "#00f5d4",
-                  color: "#12121e",
-                  borderRadius: 10,
-                  padding: "0 6px",
-                  fontSize: 10,
-                  fontWeight: 700,
+                  padding: "8px 12px",
+                  borderRadius: 8,
+                  border: "1px solid #E5E0D8",
+                  background: "#FFFFFF",
+                  color: "#2D2A26",
+                  fontSize: 13,
+                  outline: "none",
+                  cursor: "pointer",
+                  minWidth: 140,
+                  maxWidth: 180,
+                  boxSizing: "border-box",
                 }}
               >
-                {filterCategories.length}
-              </span>
-            )}
-          </button>
-          {categoryDropdownOpen && (
-            <div
-              style={{
-                position: "absolute",
-                top: "100%",
-                left: 0,
-                marginTop: 4,
-                background: "#1e1e2e",
-                border: "1px solid #333",
-                borderRadius: 10,
-                padding: 12,
-                zIndex: 100,
-                minWidth: 260,
-                maxHeight: 320,
-                overflowY: "auto",
-              }}
-            >
-              <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+                <option value="">Dönem seç...</option>
+                {MONTH_OPTIONS.map((opt) => (
+                  <option key={`${opt.year}-${opt.month}`} value={`${opt.year}-${opt.month}`}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              <div className="dashboard-filter-presets">
+              {DATE_PRESETS.map((preset) => (
                 <button
-                  onClick={selectAllCategories}
-                  style={{ ...btnStyle, background: "#333", color: "#ccc", fontSize: 11, padding: "3px 8px" }}
-                >
-                  Tümünü seç
-                </button>
-                <button
-                  onClick={clearAllCategories}
-                  style={{ ...btnStyle, background: "#333", color: "#ccc", fontSize: 11, padding: "3px 8px" }}
-                >
-                  Tümünü kaldır
-                </button>
-              </div>
-              {availableCategories.map((cat) => (
-                <label
-                  key={cat}
+                  key={preset.label}
+                  onClick={() => {
+                    const r = preset.getRange();
+                    setStartDate(r.start);
+                    setEndDate(r.end);
+                  }}
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    padding: "4px 0",
-                    cursor: "pointer",
+                    padding: "6px 12px",
+                    borderRadius: 6,
+                    border: "1px solid #E5E0D8",
+                    background: "#F8F6F3",
+                    color: "#6B6560",
                     fontSize: 12,
-                    color: "#ccc",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    transition: "all 0.15s",
+                    whiteSpace: "nowrap",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "#AA5930";
+                    e.currentTarget.style.color = "#FFFFFF";
+                    e.currentTarget.style.borderColor = "#AA5930";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "#F8F6F3";
+                    e.currentTarget.style.color = "#6B6560";
+                    e.currentTarget.style.borderColor = "#E5E0D8";
                   }}
                 >
-                  <input
-                    type="checkbox"
-                    checked={filterCategories.includes(cat)}
-                    onChange={() => toggleCategory(cat)}
-                    style={{ accentColor: "#00f5d4" }}
-                  />
-                  {getCategoryLabel(cat)}
-                </label>
+                  {preset.label}
+                </button>
               ))}
+              </div>
             </div>
-          )}
-        </div>
-
-        {/* Selected category chips */}
-        {filterCategories.length > 0 && (
-          <div style={{ display: "flex", gap: 4, flexWrap: "wrap", alignItems: "center" }}>
-            {filterCategories.map((cat) => (
-              <span
-                key={cat}
-                style={chipStyle(true)}
-                onClick={() => toggleCategory(cat)}
-              >
-                {getCategoryLabel(cat)} ×
-              </span>
-            ))}
           </div>
-        )}
 
-        {/* Reset */}
-        <button
-          onClick={() => {
-            setFilterCategories([]);
-            setStartDate("01.01.2026");
-            setEndDate("31.01.2026");
-            setCompareMode("");
-          }}
-          style={{ ...btnStyle, background: "#333", color: "#ccc" }}
-        >
-          Sıfırla
-        </button>
+          {/* Row 2: Categories, Comparison, Budget, Export */}
+          <div className="dashboard-filter-row-2">
+            {/* Category Filter */}
+            <div ref={categoryRef} style={{ position: "relative" }}>
+              <button
+                onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "8px 14px",
+                  borderRadius: 8,
+                  border: filterCategories.length > 0 ? "1px solid #AA5930" : "1px solid #E5E0D8",
+                  background: filterCategories.length > 0 ? "#AA593015" : "#FFFFFF",
+                  color: filterCategories.length > 0 ? "#AA5930" : "#6B6560",
+                  fontSize: 13,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                }}
+              >
+                <Package size={16} />
+                Kategoriler
+                {filterCategories.length > 0 && (
+                  <span
+                    style={{
+                      background: "#AA5930",
+                      color: "#FFFFFF",
+                      borderRadius: 10,
+                      padding: "2px 8px",
+                      fontSize: 11,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {filterCategories.length}
+                  </span>
+                )}
+                <ChevronDown size={14} style={{ transform: categoryDropdownOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
+              </button>
+              
+              {categoryDropdownOpen && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "calc(100% + 4px)",
+                    left: 0,
+                    background: "#FFFFFF",
+                    border: "1px solid #E5E0D8",
+                    borderRadius: 12,
+                    padding: 16,
+                    zIndex: 100,
+                    minWidth: 280,
+                    maxHeight: 320,
+                    overflowY: "auto",
+                    boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+                  }}
+                >
+                  <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                    <button
+                      onClick={selectAllCategories}
+                      style={{
+                        padding: "6px 12px",
+                        borderRadius: 6,
+                        border: "1px solid #E5E0D8",
+                        background: "#F8F6F3",
+                        color: "#6B6560",
+                        fontSize: 12,
+                        fontWeight: 500,
+                        cursor: "pointer",
+                      }}
+                    >
+                      Tümünü seç
+                    </button>
+                    <button
+                      onClick={clearAllCategories}
+                      style={{
+                        padding: "6px 12px",
+                        borderRadius: 6,
+                        border: "1px solid #E5E0D8",
+                        background: "#F8F6F3",
+                        color: "#6B6560",
+                        fontSize: 12,
+                        fontWeight: 500,
+                        cursor: "pointer",
+                      }}
+                    >
+                      Temizle
+                    </button>
+                  </div>
+                  {availableCategories.map((cat) => (
+                    <label
+                      key={cat}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        padding: "8px 0",
+                        cursor: "pointer",
+                        fontSize: 13,
+                        color: "#2D2A26",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={filterCategories.includes(cat)}
+                        onChange={() => toggleCategory(cat)}
+                        style={{ accentColor: "#AA5930", width: 16, height: 16, cursor: "pointer" }}
+                      />
+                      {getCategoryLabel(cat)}
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Selected category chips */}
+            {filterCategories.length > 0 && (
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+                {filterCategories.map((cat) => (
+                  <span
+                    key={cat}
+                    onClick={() => toggleCategory(cat)}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                      padding: "4px 10px",
+                      borderRadius: 16,
+                      fontSize: 12,
+                      fontWeight: 500,
+                      cursor: "pointer",
+                      background: "#AA593015",
+                      color: "#AA5930",
+                      border: "1px solid #AA593030",
+                    }}
+                  >
+                    {getCategoryLabel(cat)}
+                    <X size={12} />
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div style={{ flex: 1 }} />
+
+            {/* Comparison & Budget */}
+            <div className="dashboard-comparison-budget-row">
+              {/* Comparison */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 12, color: "#9B9590", fontWeight: 500 }}>Karşılaştır:</span>
+                <select
+                  value={compareMode}
+                  onChange={(e) => setCompareMode(e.target.value)}
+                  style={{
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    border: "1px solid #E5E0D8",
+                    background: "#FFFFFF",
+                    color: "#2D2A26",
+                    fontSize: 13,
+                    outline: "none",
+                    minWidth: 160,
+                  }}
+                >
+                  {COMPARE_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+                {compareMode === "custom" && (
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <input
+                      type="date"
+                      value={toIsoDate(customCompareStart)}
+                      onChange={(e) => setCustomCompareStart(fromIsoDate(e.target.value))}
+                      style={{
+                        padding: "8px 10px",
+                        borderRadius: 8,
+                        border: "1px solid #E5E0D8",
+                        background: "#FFFFFF",
+                        color: "#2D2A26",
+                        fontSize: 12,
+                        outline: "none",
+                      }}
+                    />
+                    <input
+                      type="date"
+                      value={toIsoDate(customCompareEnd)}
+                      onChange={(e) => setCustomCompareEnd(fromIsoDate(e.target.value))}
+                      style={{
+                        padding: "8px 10px",
+                        borderRadius: 8,
+                        border: "1px solid #E5E0D8",
+                        background: "#FFFFFF",
+                        color: "#2D2A26",
+                        fontSize: 12,
+                        outline: "none",
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Budget */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <Wallet size={14} style={{ color: "#9B9590" }} />
+                <input
+                  type="text"
+                  value={budgetInput}
+                  onChange={(e) => setBudgetInput(e.target.value)}
+                  placeholder="Bütçe"
+                  style={{
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    border: "1px solid #E5E0D8",
+                    background: "#FFFFFF",
+                    color: "#2D2A26",
+                    fontSize: 13,
+                    outline: "none",
+                    width: 100,
+                  }}
+                  onKeyDown={(e) => { if (e.key === "Enter") applyBudget(); }}
+                />
+                <button
+                  onClick={applyBudget}
+                  style={{
+                    padding: "8px 14px",
+                    borderRadius: 8,
+                    border: "none",
+                    background: "#AA5930",
+                    color: "#FFFFFF",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  Uygula
+                </button>
+              </div>
+            </div>
+
+            {/* Export & Quick Report */}
+            <div className="dashboard-filter-export-row">
+              <button
+                onClick={() => setReportModalOpen(true)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "8px 14px",
+                  borderRadius: 8,
+                  border: "none",
+                  background: "#7C4A36",
+                  color: "#FFFFFF",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                <BookOpen size={14} />
+                Hızlı raporu oku
+              </button>
+              <button
+                onClick={() => exportExcel(transactions)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "8px 14px",
+                  borderRadius: 8,
+                  border: "none",
+                  background: "#4A7C59",
+                  color: "#FFFFFF",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                <FileSpreadsheet size={14} />
+                Excel
+              </button>
+              <button
+                onClick={() => exportCsv(transactions)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "8px 14px",
+                  borderRadius: 8,
+                  border: "none",
+                  background: "#2D2A26",
+                  color: "#FFFFFF",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                <FileText size={14} />
+                CSV
+              </button>
+              <button
+                onClick={() => exportPdf("dashboard-content", periodTitle)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "8px 14px",
+                  borderRadius: 8,
+                  border: "none",
+                  background: "#D8BF9F",
+                  color: "#2D2A26",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                <FileDown size={14} />
+                PDF
+              </button>
+              <button
+                onClick={() => {
+                  setFilterCategories([]);
+                  setStartDate("01.01.2026");
+                  setEndDate("31.01.2026");
+                  setCompareMode("");
+                }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "8px 14px",
+                  borderRadius: 8,
+                  border: "1px solid #E5E0D8",
+                  background: "#FFFFFF",
+                  color: "#6B6560",
+                  fontSize: 12,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+              >
+                <RotateCcw size={14} />
+                Sıfırla
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* ─── Date validation error ─── */}
-      {dateError && (
-        <div style={{ padding: "8px 24px", background: "#2a1a1e", color: "#ef476f", fontSize: 12, fontWeight: 600 }}>
-          ⚠️ {dateError}
+      {/* ─── Quick Report Modal ─── */}
+      {reportModalOpen && (
+        <div
+          className="dashboard-report-modal-overlay"
+          onClick={() => setReportModalOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="report-modal-title"
+        >
+          <div
+            className="dashboard-report-modal-box"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="dashboard-report-modal-header">
+              <h2 id="report-modal-title" style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "var(--primary)" }}>
+                {QUICK_REPORT_TITLE}
+              </h2>
+              <button
+                type="button"
+                onClick={() => setReportModalOpen(false)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 36,
+                  height: 36,
+                  borderRadius: 8,
+                  border: "1px solid #E5E0D8",
+                  background: "#FFFFFF",
+                  color: "#6B6560",
+                  cursor: "pointer",
+                }}
+                aria-label="Kapat"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="dashboard-report-modal-body">
+              <pre className="report-pre">{QUICK_REPORT_CONTENT}</pre>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* ─── Second row: Comparison, Budget, Export ─── */}
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 12,
-          padding: "10px 24px 14px",
-          background: "#161625",
-          alignItems: "center",
-          borderTop: "1px solid #222",
-        }}
-      >
-        {/* Comparison selector */}
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ fontSize: 12, color: "#888" }}>Karşılaştırma:</span>
-          <select
-            value={compareMode}
-            onChange={(e) => setCompareMode(e.target.value)}
-            style={{ ...inputStyle, width: 180 }}
-          >
-            {COMPARE_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-          </select>
-          {compareMode === "custom" && (
-            <>
-              <input
-                type="date"
-                value={toIsoDate(customCompareStart)}
-                onChange={(e) => setCustomCompareStart(fromIsoDate(e.target.value))}
-                style={{ ...inputStyle, width: 130 }}
-              />
-              <input
-                type="date"
-                value={toIsoDate(customCompareEnd)}
-                onChange={(e) => setCustomCompareEnd(fromIsoDate(e.target.value))}
-                style={{ ...inputStyle, width: 130 }}
-              />
-            </>
-          )}
+      {/* ─── Date validation error ─── */}
+      {dateError && (
+        <div style={{ padding: "12px 24px", background: "#FEF2F2", color: "#B54242", fontSize: 13, fontWeight: 600, borderBottom: "1px solid #FECACA", display: "flex", alignItems: "center", gap: 8 }}>
+          <AlertTriangle size={16} />
+          {dateError}
         </div>
-
-        <div style={{ width: 1, height: 20, background: "#333" }} />
-
-        {/* Budget input */}
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ fontSize: 12, color: "#888" }}>Bütçe (₺):</span>
-          <input
-            type="text"
-            value={budgetInput}
-            onChange={(e) => setBudgetInput(e.target.value)}
-            placeholder="Örn: 5000000"
-            style={{ ...inputStyle, width: 120 }}
-            onKeyDown={(e) => { if (e.key === "Enter") applyBudget(); }}
-          />
-          <button
-            onClick={applyBudget}
-            style={{ ...btnStyle, background: "#00f5d420", color: "#00f5d4", border: "1px solid #00f5d4" }}
-          >
-            Uygula
-          </button>
-        </div>
-
-        <div style={{ width: 1, height: 20, background: "#333" }} />
-
-        {/* Export buttons */}
-        <div style={{ display: "flex", gap: 6 }}>
-          <button
-            onClick={() => exportExcel(transactions)}
-            style={{ ...btnStyle, background: "#06d6a020", color: "#06d6a0", border: "1px solid #06d6a0" }}
-          >
-            Excel İndir
-          </button>
-          <button
-            onClick={() => exportCsv(transactions)}
-            style={{ ...btnStyle, background: "#00bbf920", color: "#00bbf9", border: "1px solid #00bbf9" }}
-          >
-            CSV İndir
-          </button>
-          <button
-            onClick={() => exportPdf("dashboard-content", periodTitle)}
-            style={{ ...btnStyle, background: "#9b5de520", color: "#9b5de5", border: "1px solid #9b5de5" }}
-          >
-            PDF Rapor İndir
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* ─── Loading overlay ─── */}
       {loading && transactions.length > 0 && (
-        <div style={{ padding: "8px 24px", background: "#1a1a2e", display: "flex", alignItems: "center", gap: 8 }}>
-          <div
-            style={{
-              width: 16,
-              height: 16,
-              border: "2px solid #333",
-              borderTopColor: "#00f5d4",
-              borderRadius: "50%",
-              animation: "spin 0.8s linear infinite",
-            }}
-          />
+        <div style={{ padding: "12px 24px", background: "#FEF3C7", display: "flex", alignItems: "center", gap: 10 }}>
+          <RefreshCw size={16} style={{ color: "#92400E", animation: "spin 1s linear infinite" }} />
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-          <span style={{ fontSize: 12, color: "#888" }}>Güncelleniyor...</span>
+          <span style={{ fontSize: 13, color: "#92400E", fontWeight: 500 }}>Güncelleniyor...</span>
         </div>
       )}
 
@@ -914,19 +1147,30 @@ export default function Dashboard() {
       {error && (
         <div
           style={{
-            padding: "12px 24px",
-            background: "#2a1a1e",
+            padding: "16px 24px",
+            background: "#FEF2F2",
             display: "flex",
             alignItems: "center",
-            gap: 12,
+            gap: 16,
+            borderBottom: "1px solid #FECACA",
           }}
         >
-          <span style={{ color: "#ef476f", fontSize: 13, fontWeight: 600 }}>
-            ⚠️ {error}
+          <AlertTriangle size={20} color="#B54242" />
+          <span style={{ color: "#B54242", fontSize: 14, fontWeight: 600, flex: 1 }}>
+            {error}
           </span>
           <button
             onClick={fetchData}
-            style={{ ...btnStyle, background: "#ef476f20", color: "#ef476f", border: "1px solid #ef476f" }}
+            style={{
+              padding: "8px 16px",
+              borderRadius: 8,
+              border: "none",
+              background: "#B54242",
+              color: "#FFFFFF",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
           >
             Yenile
           </button>
@@ -934,38 +1178,46 @@ export default function Dashboard() {
       )}
 
       {/* ─── Tabs ─── */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: 8,
-          padding: "16px 24px",
-          flexWrap: "wrap",
-          background: "#161625",
-        }}
-      >
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+      <div style={{ background: "#FFFFFF", borderBottom: "1px solid #E5E0D8" }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto", padding: "16px 24px" }}>
+          <div
             style={{
-              padding: "10px 20px",
-              borderRadius: 24,
-              border: "none",
-              cursor: "pointer",
-              fontSize: 13,
-              fontWeight: 600,
-              transition: "all 0.2s",
-              background:
-                activeTab === tab.id
-                  ? "linear-gradient(135deg, #00f5d4, #00bbf9)"
-                  : "#1e1e2e",
-              color: activeTab === tab.id ? "#12121e" : "#888",
+              display: "flex",
+              gap: 8,
+              flexWrap: "wrap",
+              justifyContent: "center",
             }}
           >
-            {tab.icon} {tab.label}
-          </button>
-        ))}
+            {TABS.map((tab) => {
+              const Icon = tab.Icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "10px 20px",
+                    borderRadius: 24,
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    transition: "all 0.2s",
+                    background: activeTab === tab.id ? "#AA5930" : "#F8F6F3",
+                    color: activeTab === tab.id ? "#FFFFFF" : "#6B6560",
+                    boxShadow: activeTab === tab.id ? "0 2px 8px rgba(170, 89, 48, 0.3)" : "none",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  <Icon size={18} />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {/* ─── Dashboard content ─── */}
@@ -973,8 +1225,8 @@ export default function Dashboard() {
         id="dashboard-content"
         ref={dashboardRef}
         style={{
-          padding: "16px 24px 40px",
-          maxWidth: 1200,
+          padding: "24px",
+          maxWidth: 1400,
           margin: "0 auto",
           opacity: loading ? 0.5 : 1,
           transition: "opacity 0.2s",
@@ -985,15 +1237,18 @@ export default function Dashboard() {
           <div
             style={{
               textAlign: "center",
-              padding: "60px 20px",
-              color: "#666",
+              padding: "80px 20px",
+              color: "#9B9590",
+              background: "#FFFFFF",
+              borderRadius: 16,
+              border: "1px solid #E5E0D8",
             }}
           >
-            <div style={{ fontSize: 48, marginBottom: 12 }}>📭</div>
-            <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>
+            <Filter size={48} style={{ marginBottom: 16, opacity: 0.3 }} />
+            <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 8, color: "#6B6560" }}>
               Seçilen filtreye uygun kayıt bulunamadı
             </div>
-            <div style={{ fontSize: 13 }}>
+            <div style={{ fontSize: 14 }}>
               Tarih aralığını veya kategori filtrelerini değiştirmeyi deneyin.
             </div>
           </div>
@@ -1046,10 +1301,10 @@ export default function Dashboard() {
       </div>
 
       {/* ─── Footer ─── */}
-      <div style={{ textAlign: "center", padding: "24px", color: "#444", fontSize: 12 }}>
+      <footer style={{ textAlign: "center", padding: "24px", color: "#9B9590", fontSize: 12, borderTop: "1px solid #E5E0D8", background: "#FFFFFF" }}>
         {periodTitle} • Veri kaynağı: veriler/*.csv • {transactions.length} işlem analiz edildi
         {startDate && endDate && ` • ${startDate} - ${endDate}`}
-      </div>
+      </footer>
     </div>
   );
 }

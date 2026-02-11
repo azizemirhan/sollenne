@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { loadTransactionsFromCsv } from "@/lib/csv";
 import type { Transaction } from "@/types/transaction";
 
+export const dynamic = 'force-static';
+export const revalidate = 0;
+
 function parseDateToComparable(dateStr: string): number {
   const parts = dateStr.trim().split(".");
   if (parts.length < 3) return 0;

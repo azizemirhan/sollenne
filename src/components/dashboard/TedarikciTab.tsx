@@ -11,6 +11,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { AlertTriangle } from "lucide-react";
 import { ChartCard } from "./ChartCard";
 import { CustomTooltip } from "./CustomTooltip";
 import { DrillDownModal } from "./DrillDownModal";
@@ -50,14 +51,14 @@ export function TedarikciTab({ supplierData, totalSpend, transactions }: Tedarik
   };
 
   return (
-    <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+    <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
       <ChartCard title="En Büyük 10 Tedarikçi" fullWidth>
         <ResponsiveContainer width="100%" height={420}>
           <BarChart data={supplierData.slice(0, 10)} layout="vertical" margin={{ left: 160 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E5E0D8" />
             <XAxis
               type="number"
-              tick={{ fill: "#888", fontSize: 11 }}
+              tick={{ fill: "#6B6560", fontSize: 11 }}
               tickFormatter={(v) =>
                 v >= 1000000 ? `${(v / 1000000).toFixed(1)}M` : `${(v / 1000).toFixed(0)}K`
               }
@@ -65,7 +66,7 @@ export function TedarikciTab({ supplierData, totalSpend, transactions }: Tedarik
             <YAxis
               dataKey="name"
               type="category"
-              tick={{ fill: "#ccc", fontSize: 11 }}
+              tick={{ fill: "#6B6560", fontSize: 11 }}
               width={180}
             />
             <Tooltip content={<CustomTooltip />} />
@@ -89,19 +90,20 @@ export function TedarikciTab({ supplierData, totalSpend, transactions }: Tedarik
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 12,
-              marginBottom: 16,
-              padding: "12px 16px",
-              background: "#161625",
-              borderRadius: 8,
+              gap: 16,
+              marginBottom: 20,
+              padding: "16px 20px",
+              background: "#FEF3C7",
+              borderRadius: 12,
+              border: "1px solid #FDE68A",
             }}
           >
-            <span style={{ fontSize: 28 }}>⚠️</span>
+            <AlertTriangle size={28} color="#92400E" />
             <div>
-              <div style={{ color: "#fee440", fontWeight: 600, fontSize: 14 }}>
+              <div style={{ color: "#92400E", fontWeight: 600, fontSize: 15 }}>
                 Tedarikçi Yoğunlaşma Uyarısı
               </div>
-              <div style={{ color: "#888", fontSize: 12 }}>
+              <div style={{ color: "#B45309", fontSize: 13 }}>
                 İlk 3 tedarikçi toplam harcamanın %{top3Share} ini oluşturuyor
               </div>
             </div>
@@ -110,7 +112,7 @@ export function TedarikciTab({ supplierData, totalSpend, transactions }: Tedarik
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-              gap: 8,
+              gap: 10,
             }}
           >
             {supplierData.slice(0, 15).map((s, i) => (
@@ -120,27 +122,36 @@ export function TedarikciTab({ supplierData, totalSpend, transactions }: Tedarik
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 10,
-                  padding: "8px 12px",
-                  background: "#161625",
-                  borderRadius: 8,
+                  gap: 12,
+                  padding: "12px 16px",
+                  background: "#F8F6F3",
+                  borderRadius: 10,
                   cursor: "pointer",
-                  transition: "background 0.2s",
+                  transition: "background 0.2s, transform 0.2s",
+                  border: "1px solid #E5E0D8",
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "#1e1e35")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "#161625")}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#FFFFFF";
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                  e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#F8F6F3";
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
               >
                 <div
                   style={{
-                    width: 28,
-                    height: 28,
+                    width: 32,
+                    height: 32,
                     borderRadius: "50%",
-                    background: CHART_COLORS[i % CHART_COLORS.length] + "22",
+                    background: CHART_COLORS[i % CHART_COLORS.length] + "20",
                     color: CHART_COLORS[i % CHART_COLORS.length],
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontSize: 12,
+                    fontSize: 13,
                     fontWeight: 700,
                     flexShrink: 0,
                   }}
@@ -150,9 +161,9 @@ export function TedarikciTab({ supplierData, totalSpend, transactions }: Tedarik
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div
                     style={{
-                      fontSize: 12,
-                      fontWeight: 500,
-                      color: "#ddd",
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: "#2D2A26",
                       whiteSpace: "nowrap",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
@@ -160,17 +171,17 @@ export function TedarikciTab({ supplierData, totalSpend, transactions }: Tedarik
                   >
                     {s.name}
                   </div>
-                  <div style={{ fontSize: 11, color: "#666" }}>
+                  <div style={{ fontSize: 12, color: "#9B9590" }}>
                     {formatFull(Math.round(s.value))} ₺
                   </div>
                 </div>
                 <div
                   style={{
-                    background: CHART_COLORS[i % CHART_COLORS.length] + "22",
+                    background: CHART_COLORS[i % CHART_COLORS.length] + "20",
                     color: CHART_COLORS[i % CHART_COLORS.length],
-                    padding: "3px 10px",
-                    borderRadius: 12,
-                    fontSize: 12,
+                    padding: "4px 12px",
+                    borderRadius: 16,
+                    fontSize: 13,
                     fontWeight: 700,
                   }}
                 >

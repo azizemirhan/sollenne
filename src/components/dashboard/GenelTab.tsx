@@ -19,6 +19,7 @@ import {
   PolarRadiusAxis,
   Legend,
 } from "recharts";
+import { Wallet, FileText, Building2, Boxes, BarChart3, Scale } from "lucide-react";
 import { KPICard } from "./KPICard";
 import { ChartCard } from "./ChartCard";
 import { CustomTooltip } from "./CustomTooltip";
@@ -114,7 +115,7 @@ export function GenelTab({
     };
     const [min, max] = bins[entry.range] || [0, Infinity];
     const filtered = transactions.filter((t) => t.total >= min && t.total < max);
-    setDrillDown({ title: `Tutar araligi: ${entry.range}`, items: filtered });
+    setDrillDown({ title: `Tutar aralığı: ${entry.range}`, items: filtered });
   };
 
   const budgetGeneral = budget?.general || 0;
@@ -123,44 +124,44 @@ export function GenelTab({
 
   return (
     <>
-      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 16 }}>
+      <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 20 }}>
         <KPICard
-          icon="💰"
+          icon={<Wallet size={28} />}
           label="Toplam Harcama"
           value={`${formatFull(Math.round(stats.totalSpend))} ₺`}
           sub="Aylık bütçe"
           changePct={compareStats ? pctChange(stats.totalSpend, compareStats.totalSpend) : null}
         />
         <KPICard
-          icon="📋"
+          icon={<FileText size={28} />}
           label="İşlem Sayısı"
           value={stats.txCount}
           sub="Toplam belge"
           changePct={compareStats ? pctChange(stats.txCount, compareStats.txCount) : null}
         />
         <KPICard
-          icon="🏢"
+          icon={<Building2 size={28} />}
           label="Tedarikçi"
           value={stats.suppliers}
           sub="Aktif firma"
           changePct={compareStats ? pctChange(stats.suppliers, compareStats.suppliers) : null}
         />
         <KPICard
-          icon="📦"
+          icon={<Boxes size={28} />}
           label="Ürün Çeşidi"
           value={stats.products}
           sub="Farklı kalem"
           changePct={compareStats ? pctChange(stats.products, compareStats.products) : null}
         />
         <KPICard
-          icon="📊"
+          icon={<BarChart3 size={28} />}
           label="Ortalama İşlem"
           value={`${formatFull(Math.round(stats.avg))} ₺`}
           sub="İşlem başına"
           changePct={compareStats ? pctChange(stats.avg, compareStats.avg) : null}
         />
         <KPICard
-          icon="📉"
+          icon={<Scale size={28} />}
           label="Medyan İşlem"
           value={`${formatFull(Math.round(stats.median))} ₺`}
           sub="Ortanca değer"
@@ -171,52 +172,54 @@ export function GenelTab({
       {budgetGeneral > 0 && (
         <div
           style={{
-            background: "#1e1e2e",
-            borderRadius: 12,
-            padding: "16px 20px",
-            marginBottom: 16,
+            background: "#FFFFFF",
+            borderRadius: 16,
+            padding: "20px 24px",
+            marginBottom: 20,
             display: "flex",
             flexWrap: "wrap",
-            gap: 20,
+            gap: 24,
             alignItems: "center",
+            border: "1px solid #E5E0D8",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
           }}
         >
           <div style={{ flex: "1 1 auto" }}>
-            <div style={{ fontSize: 12, color: "#888", fontWeight: 600, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1 }}>
+            <div style={{ fontSize: 12, color: "#9B9590", fontWeight: 600, marginBottom: 12, textTransform: "uppercase", letterSpacing: 1 }}>
               Bütçe Durumu
             </div>
-            <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: 32, flexWrap: "wrap" }}>
               <div>
-                <div style={{ fontSize: 11, color: "#666" }}>Bütçe</div>
-                <div style={{ fontSize: 18, fontWeight: 700, color: "#00bbf9" }}>
+                <div style={{ fontSize: 12, color: "#9B9590" }}>Bütçe</div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: "#6B6560" }}>
                   {formatFull(budgetGeneral)} ₺
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: 11, color: "#666" }}>Gerçekleşen</div>
-                <div style={{ fontSize: 18, fontWeight: 700, color: "#00f5d4" }}>
+                <div style={{ fontSize: 12, color: "#9B9590" }}>Gerçekleşen</div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: "#AA5930" }}>
                   {formatFull(Math.round(stats.totalSpend))} ₺
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: 11, color: "#666" }}>Kalan</div>
+                <div style={{ fontSize: 12, color: "#9B9590" }}>Kalan</div>
                 <div
                   style={{
-                    fontSize: 18,
+                    fontSize: 20,
                     fontWeight: 700,
-                    color: budgetRemaining >= 0 ? "#06d6a0" : "#ef476f",
+                    color: budgetRemaining >= 0 ? "#4A7C59" : "#B54242",
                   }}
                 >
                   {budgetRemaining >= 0 ? "" : "-"}{formatFull(Math.abs(Math.round(budgetRemaining)))} ₺
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: 11, color: "#666" }}>Kullanım</div>
+                <div style={{ fontSize: 12, color: "#9B9590" }}>Kullanım</div>
                 <div
                   style={{
-                    fontSize: 18,
+                    fontSize: 20,
                     fontWeight: 700,
-                    color: budgetUsed > 100 ? "#ef476f" : budgetUsed > 80 ? "#fee440" : "#06d6a0",
+                    color: budgetUsed > 100 ? "#B54242" : budgetUsed > 80 ? "#C9A227" : "#4A7C59",
                   }}
                 >
                   %{budgetUsed.toFixed(1)}
@@ -225,10 +228,10 @@ export function GenelTab({
             </div>
             <div
               style={{
-                marginTop: 10,
-                height: 8,
-                background: "#333",
-                borderRadius: 4,
+                marginTop: 12,
+                height: 10,
+                background: "#F8F6F3",
+                borderRadius: 5,
                 overflow: "hidden",
               }}
             >
@@ -238,11 +241,11 @@ export function GenelTab({
                   width: `${Math.min(budgetUsed, 100)}%`,
                   background:
                     budgetUsed > 100
-                      ? "#ef476f"
+                      ? "#B54242"
                       : budgetUsed > 80
-                        ? "#fee440"
-                        : "#06d6a0",
-                  borderRadius: 4,
+                        ? "#C9A227"
+                        : "#4A7C59",
+                  borderRadius: 5,
                   transition: "width 0.3s",
                 }}
               />
@@ -251,20 +254,20 @@ export function GenelTab({
         </div>
       )}
 
-      <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
         <ChartCard title="Haftalık Harcama Karşılaştırması">
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={weeklyData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#E5E0D8" />
               <XAxis
                 dataKey="name"
-                tick={{ fill: "#888", fontSize: 11 }}
+                tick={{ fill: "#6B6560", fontSize: 11 }}
                 angle={-15}
                 textAnchor="end"
                 height={50}
               />
               <YAxis
-                tick={{ fill: "#888", fontSize: 11 }}
+                tick={{ fill: "#6B6560", fontSize: 11 }}
                 tickFormatter={(v) => `${(v / 1000000).toFixed(1)}M`}
               />
               <Tooltip content={<CustomTooltip />} />
@@ -285,20 +288,20 @@ export function GenelTab({
         <ChartCard title="Gün Bazlı Harcama Dağılımı">
           <ResponsiveContainer width="100%" height={280}>
             <RadarChart data={dayOfWeekData} cx="50%" cy="50%">
-              <PolarGrid stroke="#333" />
-              <PolarAngleAxis dataKey="day" tick={{ fill: "#ccc", fontSize: 12 }} />
+              <PolarGrid stroke="#E5E0D8" />
+              <PolarAngleAxis dataKey="day" tick={{ fill: "#6B6560", fontSize: 12 }} />
               <PolarRadiusAxis
-                tick={{ fill: "#666", fontSize: 10 }}
+                tick={{ fill: "#9B9590", fontSize: 10 }}
                 tickFormatter={(v) => `${(v / 1000000).toFixed(1)}M`}
               />
               <Radar
                 name="Harcama"
                 dataKey="value"
-                stroke="#00f5d4"
-                fill="#00f5d4"
+                stroke="#AA5930"
+                fill="#AA5930"
                 fillOpacity={0.2}
                 strokeWidth={2}
-                dot={{ r: 4, fill: "#00f5d4" }}
+                dot={{ r: 4, fill: "#AA5930" }}
               />
             </RadarChart>
           </ResponsiveContainer>
@@ -330,7 +333,7 @@ export function GenelTab({
                   align="right"
                   verticalAlign="middle"
                   wrapperStyle={{ fontSize: 11, lineHeight: "18px", paddingLeft: 10 }}
-                  formatter={(val) => <span style={{ color: "#ccc" }}>{val}</span>}
+                  formatter={(val) => <span style={{ color: "#6B6560" }}>{val}</span>}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -339,14 +342,14 @@ export function GenelTab({
         <ChartCard title="İşlem Tutarı Dağılımı (Histogram)">
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={histogramData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-              <XAxis dataKey="range" tick={{ fill: "#888", fontSize: 11 }} />
-              <YAxis tick={{ fill: "#888", fontSize: 11 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#E5E0D8" />
+              <XAxis dataKey="range" tick={{ fill: "#6B6560", fontSize: 11 }} />
+              <YAxis tick={{ fill: "#6B6560", fontSize: 11 }} />
               <Tooltip content={<CustomTooltip formatter={(v) => `${v} işlem`} />} />
               <Bar
                 dataKey="count"
                 name="İşlem Sayısı"
-                fill="#00bbf9"
+                fill="#AA5930"
                 radius={[6, 6, 0, 0]}
                 onClick={(_: unknown, idx: number) => handleHistogramClick(idx)}
                 cursor="pointer"

@@ -71,20 +71,20 @@ export function TrendlerTab({ dailyData, weeklyData, transactions }: TrendlerTab
   };
 
   return (
-    <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+    <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
       <ChartCard title="Günlük Harcama Trendi (Detaylı)" fullWidth>
         <ResponsiveContainer width="100%" height={320}>
           <BarChart data={dailyData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E5E0D8" />
             <XAxis
               dataKey="date"
-              tick={{ fill: "#888", fontSize: 10 }}
+              tick={{ fill: "#6B6560", fontSize: 10 }}
               angle={-45}
               textAnchor="end"
               height={60}
             />
             <YAxis
-              tick={{ fill: "#888", fontSize: 11 }}
+              tick={{ fill: "#6B6560", fontSize: 11 }}
               tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
             />
             <Tooltip content={<CustomTooltip />} />
@@ -105,33 +105,33 @@ export function TrendlerTab({ dailyData, weeklyData, transactions }: TrendlerTab
       <ChartCard title="Kümülatif Harcama Trendi">
         <ResponsiveContainer width="100%" height={280}>
           <AreaChart data={cumulativeData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E5E0D8" />
             <XAxis
               dataKey="date"
-              tick={{ fill: "#888", fontSize: 10 }}
+              tick={{ fill: "#6B6560", fontSize: 10 }}
               angle={-45}
               textAnchor="end"
               height={60}
             />
             <YAxis
-              tick={{ fill: "#888", fontSize: 11 }}
+              tick={{ fill: "#6B6560", fontSize: 11 }}
               tickFormatter={(v) => `${(v / 1000000).toFixed(1)}M`}
             />
             <Tooltip content={<CustomTooltip />} />
             <defs>
               <linearGradient id="gradCum" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#00f5d4" stopOpacity={0.4} />
-                <stop offset="95%" stopColor="#00f5d4" stopOpacity={0.05} />
+                <stop offset="5%" stopColor="#AA5930" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#AA5930" stopOpacity={0.05} />
               </linearGradient>
             </defs>
             <Area
               type="monotone"
               dataKey="cumulative"
               name="Kümülatif"
-              stroke="#00f5d4"
+              stroke="#AA5930"
               fill="url(#gradCum)"
               strokeWidth={2}
-              dot={{ r: 3, fill: "#00f5d4" }}
+              dot={{ r: 3, fill: "#AA5930" }}
             />
           </AreaChart>
         </ResponsiveContainer>
@@ -139,20 +139,20 @@ export function TrendlerTab({ dailyData, weeklyData, transactions }: TrendlerTab
       <ChartCard title="Haftalık İşlem Yoğunluğu">
         <ResponsiveContainer width="100%" height={280}>
           <BarChart data={weeklyCountData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E5E0D8" />
             <XAxis
               dataKey="name"
-              tick={{ fill: "#888", fontSize: 10 }}
+              tick={{ fill: "#6B6560", fontSize: 10 }}
               angle={-15}
               textAnchor="end"
               height={50}
             />
-            <YAxis tick={{ fill: "#888", fontSize: 11 }} />
+            <YAxis tick={{ fill: "#6B6560", fontSize: 11 }} />
             <Tooltip content={<CustomTooltip formatter={(v) => `${v} işlem`} />} />
             <Bar
               dataKey="count"
               name="İşlem Sayısı"
-              fill="#9b5de5"
+              fill="#D8BF9F"
               radius={[6, 6, 0, 0]}
               onClick={(_: unknown, idx: number) => handleWeeklyClick(idx)}
               cursor="pointer"

@@ -56,7 +56,7 @@ export function DrillDownModal({ title, items, onClose }: DrillDownModalProps) {
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(0,0,0,0.7)",
+        background: "rgba(45, 42, 38, 0.6)",
         zIndex: 1000,
         display: "flex",
         alignItems: "center",
@@ -67,14 +67,15 @@ export function DrillDownModal({ title, items, onClose }: DrillDownModalProps) {
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          background: "#1a1a2e",
-          borderRadius: 12,
+          background: "#FFFFFF",
+          borderRadius: 16,
           maxWidth: 1100,
           width: "100%",
           maxHeight: "85vh",
           display: "flex",
           flexDirection: "column",
-          border: "1px solid #333",
+          border: "1px solid #E5E0D8",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
         }}
       >
         <div
@@ -82,56 +83,67 @@ export function DrillDownModal({ title, items, onClose }: DrillDownModalProps) {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            padding: "16px 20px",
-            borderBottom: "1px solid #333",
+            padding: "20px 24px",
+            borderBottom: "1px solid #E5E0D8",
+            background: "#F8F6F3",
+            borderRadius: "16px 16px 0 0",
           }}
         >
           <div>
-            <h3 style={{ margin: 0, fontSize: 16, color: "#00f5d4", fontWeight: 700 }}>
+            <h3 style={{ margin: 0, fontSize: 18, color: "#2D2A26", fontWeight: 700 }}>
               {title}
             </h3>
-            <div style={{ fontSize: 12, color: "#888", marginTop: 4 }}>
-              {items.length} islem &bull; Toplam: {formatFull(Math.round(totalSum))} TL
+            <div style={{ fontSize: 13, color: "#9B9590", marginTop: 4 }}>
+              {items.length} işlem • Toplam: {formatFull(Math.round(totalSum))} TL
             </div>
           </div>
           <button
             onClick={onClose}
             style={{
-              background: "#333",
-              border: "none",
-              color: "#ccc",
-              width: 32,
-              height: 32,
-              borderRadius: 8,
+              background: "#FFFFFF",
+              border: "1px solid #E5E0D8",
+              color: "#6B6560",
+              width: 36,
+              height: 36,
+              borderRadius: 10,
               cursor: "pointer",
-              fontSize: 16,
+              fontSize: 18,
               fontWeight: 700,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              transition: "all 0.2s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "#F8F6F3";
+              e.currentTarget.style.color = "#2D2A26";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "#FFFFFF";
+              e.currentTarget.style.color = "#6B6560";
             }}
           >
-            X
+            ×
           </button>
         </div>
 
-        <div style={{ overflow: "auto", flex: 1, padding: "0 20px 16px" }}>
+        <div style={{ overflow: "auto", flex: 1, padding: "0 24px 20px" }}>
           <table
             style={{
               width: "100%",
               borderCollapse: "collapse",
-              fontSize: 12,
-              marginTop: 12,
+              fontSize: 13,
+              marginTop: 16,
             }}
           >
             <thead>
-              <tr style={{ borderBottom: "1px solid #333" }}>
+              <tr style={{ borderBottom: "2px solid #E5E0D8" }}>
                 <th
                   onClick={() => toggleSort("date")}
                   style={{
                     textAlign: "left",
-                    padding: "8px 6px",
-                    color: "#aaa",
+                    padding: "10px 8px",
+                    color: "#6B6560",
                     fontWeight: 600,
                     cursor: "pointer",
                     whiteSpace: "nowrap",
@@ -139,21 +151,21 @@ export function DrillDownModal({ title, items, onClose }: DrillDownModalProps) {
                 >
                   Tarih{arrow("date")}
                 </th>
-                <th style={{ textAlign: "left", padding: "8px 6px", color: "#aaa", fontWeight: 600 }}>
+                <th style={{ textAlign: "left", padding: "10px 8px", color: "#6B6560", fontWeight: 600 }}>
                   Kategori
                 </th>
-                <th style={{ textAlign: "left", padding: "8px 6px", color: "#aaa", fontWeight: 600 }}>
-                  Tedarikci
+                <th style={{ textAlign: "left", padding: "10px 8px", color: "#6B6560", fontWeight: 600 }}>
+                  Tedarikçi
                 </th>
-                <th style={{ textAlign: "left", padding: "8px 6px", color: "#aaa", fontWeight: 600 }}>
-                  Urun
+                <th style={{ textAlign: "left", padding: "10px 8px", color: "#6B6560", fontWeight: 600 }}>
+                  Ürün
                 </th>
                 <th
                   onClick={() => toggleSort("qty")}
                   style={{
                     textAlign: "right",
-                    padding: "8px 6px",
-                    color: "#aaa",
+                    padding: "10px 8px",
+                    color: "#6B6560",
                     fontWeight: 600,
                     cursor: "pointer",
                     whiteSpace: "nowrap",
@@ -161,15 +173,15 @@ export function DrillDownModal({ title, items, onClose }: DrillDownModalProps) {
                 >
                   Miktar{arrow("qty")}
                 </th>
-                <th style={{ textAlign: "left", padding: "8px 6px", color: "#aaa", fontWeight: 600 }}>
+                <th style={{ textAlign: "left", padding: "10px 8px", color: "#6B6560", fontWeight: 600 }}>
                   Birim
                 </th>
                 <th
                   onClick={() => toggleSort("unitPrice")}
                   style={{
                     textAlign: "right",
-                    padding: "8px 6px",
-                    color: "#aaa",
+                    padding: "10px 8px",
+                    color: "#6B6560",
                     fontWeight: 600,
                     cursor: "pointer",
                     whiteSpace: "nowrap",
@@ -181,8 +193,8 @@ export function DrillDownModal({ title, items, onClose }: DrillDownModalProps) {
                   onClick={() => toggleSort("total")}
                   style={{
                     textAlign: "right",
-                    padding: "8px 6px",
-                    color: "#aaa",
+                    padding: "10px 8px",
+                    color: "#6B6560",
                     fontWeight: 600,
                     cursor: "pointer",
                     whiteSpace: "nowrap",
@@ -197,16 +209,16 @@ export function DrillDownModal({ title, items, onClose }: DrillDownModalProps) {
                 <tr
                   key={i}
                   style={{
-                    borderBottom: "1px solid #222",
-                    background: i % 2 === 0 ? "transparent" : "#161625",
+                    borderBottom: "1px solid #F0EDE8",
+                    background: i % 2 === 0 ? "transparent" : "#FDFCFB",
                   }}
                 >
-                  <td style={{ padding: "6px", color: "#ccc", whiteSpace: "nowrap" }}>{t.date}</td>
-                  <td style={{ padding: "6px", color: "#ccc" }}>{getCategoryLabel(t.category)}</td>
+                  <td style={{ padding: "10px 8px", color: "#2D2A26", whiteSpace: "nowrap" }}>{t.date}</td>
+                  <td style={{ padding: "10px 8px", color: "#6B6560" }}>{getCategoryLabel(t.category)}</td>
                   <td
                     style={{
-                      padding: "6px",
-                      color: "#ccc",
+                      padding: "10px 8px",
+                      color: "#2D2A26",
                       maxWidth: 180,
                       overflow: "hidden",
                       textOverflow: "ellipsis",
@@ -217,8 +229,8 @@ export function DrillDownModal({ title, items, onClose }: DrillDownModalProps) {
                   </td>
                   <td
                     style={{
-                      padding: "6px",
-                      color: "#ccc",
+                      padding: "10px 8px",
+                      color: "#2D2A26",
                       maxWidth: 200,
                       overflow: "hidden",
                       textOverflow: "ellipsis",
@@ -227,14 +239,14 @@ export function DrillDownModal({ title, items, onClose }: DrillDownModalProps) {
                   >
                     {t.product}
                   </td>
-                  <td style={{ padding: "6px", color: "#ccc", textAlign: "right" }}>
+                  <td style={{ padding: "10px 8px", color: "#2D2A26", textAlign: "right" }}>
                     {formatFull(t.qty)}
                   </td>
-                  <td style={{ padding: "6px", color: "#888" }}>{t.unit}</td>
-                  <td style={{ padding: "6px", color: "#ccc", textAlign: "right" }}>
+                  <td style={{ padding: "10px 8px", color: "#9B9590" }}>{t.unit}</td>
+                  <td style={{ padding: "10px 8px", color: "#2D2A26", textAlign: "right" }}>
                     {formatFull(Math.round(t.unitPrice))} TL
                   </td>
-                  <td style={{ padding: "6px", color: "#00f5d4", textAlign: "right", fontWeight: 600 }}>
+                  <td style={{ padding: "10px 8px", color: "#AA5930", textAlign: "right", fontWeight: 600 }}>
                     {formatFull(Math.round(t.total))} TL
                   </td>
                 </tr>
@@ -248,40 +260,44 @@ export function DrillDownModal({ title, items, onClose }: DrillDownModalProps) {
             style={{
               display: "flex",
               justifyContent: "center",
-              gap: 8,
-              padding: "12px 20px",
-              borderTop: "1px solid #333",
+              gap: 12,
+              padding: "16px 24px",
+              borderTop: "1px solid #E5E0D8",
+              background: "#F8F6F3",
+              borderRadius: "0 0 16px 16px",
             }}
           >
             <button
               disabled={page === 0}
               onClick={() => setPage((p) => p - 1)}
               style={{
-                padding: "4px 12px",
-                borderRadius: 6,
-                border: "none",
-                background: "#333",
-                color: page === 0 ? "#555" : "#ccc",
+                padding: "8px 16px",
+                borderRadius: 8,
+                border: "1px solid #E5E0D8",
+                background: "#FFFFFF",
+                color: page === 0 ? "#9B9590" : "#2D2A26",
                 cursor: page === 0 ? "default" : "pointer",
-                fontSize: 12,
+                fontSize: 13,
+                fontWeight: 500,
               }}
             >
-              Onceki
+              Önceki
             </button>
-            <span style={{ fontSize: 12, color: "#888", lineHeight: "28px" }}>
+            <span style={{ fontSize: 13, color: "#6B6560", lineHeight: "36px", fontWeight: 500 }}>
               {page + 1} / {pageCount}
             </span>
             <button
               disabled={page >= pageCount - 1}
               onClick={() => setPage((p) => p + 1)}
               style={{
-                padding: "4px 12px",
-                borderRadius: 6,
-                border: "none",
-                background: "#333",
-                color: page >= pageCount - 1 ? "#555" : "#ccc",
+                padding: "8px 16px",
+                borderRadius: 8,
+                border: "1px solid #E5E0D8",
+                background: "#FFFFFF",
+                color: page >= pageCount - 1 ? "#9B9590" : "#2D2A26",
                 cursor: page >= pageCount - 1 ? "default" : "pointer",
-                fontSize: 12,
+                fontSize: 13,
+                fontWeight: 500,
               }}
             >
               Sonraki
