@@ -34,6 +34,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import { QUICK_REPORT_TITLE, QUICK_REPORT_CONTENT } from "@/constants/quickReport";
+import { filterByRange } from "@/lib/filter-transactions";
 
 /* ─── helpers ─── */
 
@@ -322,25 +323,44 @@ export default function Dashboard() {
         params.set("compareStart", compareRange.start);
         params.set("compareEnd", compareRange.end);
       }
-      const res = await fetch(`/api/transactions?${params.toString()}`);
-      if (!res.ok) throw new Error("Veri yüklenemedi");
-      const data = await res.json();
+      let data: Transaction[] | { current: Transaction[]; compare?: Transaction[] };
+      const apiRes = await fetch(`/api/transactions?${params.toString()}`).catch(() => null);
+      if (apiRes?.ok) {
+        data = await apiRes.json();
+      } else {
+        /* Static deploy (e.g. Cloudflare): API yok, public/transactions.json kullan */
+        const staticRes = await fetch("/transactions.json");
+        if (!staticRes.ok) throw new Error("Veri yüklenemedi");
+        const allTx: Transaction[] = await staticRes.json();
+        const current = filterByRange(allTx, startDate || null, endDate || null, filterCategories);
+        const compare =
+          compareRange?.start && compareRange?.end
+            ? filterByRange(allTx, compareRange.start, compareRange.end, filterCategories)
+            : [];
+        data = compareRange?.start && compareRange?.end ? { current, compare } : current;
+        setAvailableCategories((prev) => {
+          const cats = [...new Set(allTx.map((t) => t.category))].sort() as string[];
+          return prev.length ? prev : cats;
+        });
+      }
 
-      if (compareRange && data.current) {
+      if (compareRange && data && !Array.isArray(data) && "current" in data) {
         setTransactions(data.current);
         setCompareTransactions(data.compare || []);
       } else {
-        setTransactions(Array.isArray(data) ? data : data.current || []);
+        const list = Array.isArray(data) ? data : (data as { current?: Transaction[] }).current || [];
+        setTransactions(list);
         setCompareTransactions([]);
       }
 
       setAvailableCategories((prev) => {
-        const txList = Array.isArray(data) ? data : data.current || [];
+        const txList =
+          Array.isArray(data) ? data : (data as { current?: Transaction[] }).current || [];
         const cats = [...new Set(txList.map((t: Transaction) => t.category))].sort() as string[];
         return prev.length ? prev : cats;
       });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Bir hata oluştu");
+      setError(e instanceof Error ? e.message : "Veri yüklenemedi");
     } finally {
       setLoading(false);
     }
