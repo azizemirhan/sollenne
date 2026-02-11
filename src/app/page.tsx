@@ -32,9 +32,11 @@ import {
   Download,
   RefreshCw,
   BookOpen,
+  LogOut,
 } from "lucide-react";
 import { QUICK_REPORT_TITLE, QUICK_REPORT_CONTENT } from "@/constants/quickReport";
 import { filterByRange } from "@/lib/filter-transactions";
+import { LoginScreen, getStoredAuth, setStoredAuth } from "@/components/auth/LoginScreen";
 
 /* ─── helpers ─── */
 
@@ -209,6 +211,12 @@ const TABS = [
 ];
 
 export default function Dashboard() {
+  /* ─── auth: sessionStorage ile giriş kontrolü ─── */
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  useEffect(() => {
+    setAuthenticated(getStoredAuth());
+  }, []);
+
   /* ─── core state ─── */
   const [activeTab, setActiveTab] = useState("genel");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -541,6 +549,26 @@ export default function Dashboard() {
     setEndDate(`${days}.${m}.${year}`);
   };
 
+  /* ─── auth gate: giriş yapılmamışsa login ekranı ─── */
+  if (authenticated === null) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "#F8F6F3",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <span style={{ color: "#9B9590", fontSize: 14 }}>Yükleniyor...</span>
+      </div>
+    );
+  }
+  if (authenticated === false) {
+    return <LoginScreen onSuccess={() => setAuthenticated(true)} />;
+  }
+
   /* ─── initial loading ─── */
   if (loading && !transactions.length) {
     return (
@@ -612,23 +640,48 @@ export default function Dashboard() {
             </div>
           </div>
           
-          {/* Period badge */}
-          <div
-            style={{
-              background: "#AA5930",
-              color: "#FFFFFF",
-              padding: "8px 16px",
-              borderRadius: 20,
-              fontWeight: 600,
-              fontSize: 14,
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              alignSelf: "flex-start",
-            }}
-          >
-            <Calendar size={16} />
-            {periodBadge}
+          {/* Period badge & Logout */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+            <div
+              style={{
+                background: "#AA5930",
+                color: "#FFFFFF",
+                padding: "8px 16px",
+                borderRadius: 20,
+                fontWeight: 600,
+                fontSize: 14,
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              <Calendar size={16} />
+              {periodBadge}
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setStoredAuth(false);
+                setAuthenticated(false);
+              }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "8px 14px",
+                borderRadius: 10,
+                border: "1px solid #E5E0D8",
+                background: "#FFFFFF",
+                color: "#6B6560",
+                fontSize: 13,
+                fontWeight: 500,
+                cursor: "pointer",
+              }}
+              title="Çıkış yap"
+            >
+              <LogOut size={16} />
+              Çıkış
+            </button>
           </div>
         </div>
       </header>
