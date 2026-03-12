@@ -22,11 +22,7 @@ export function setStoredAuth(valid: boolean): void {
   } catch { /* ignore */ }
 }
 
-function checkCredentials(user: string, password: string): boolean {
-  const envUser = process.env.NEXT_PUBLIC_AUTH_USER ?? "";
-  const envPass = process.env.NEXT_PUBLIC_AUTH_PASSWORD ?? "";
-  return envUser.length > 0 && user === envUser && password === envPass;
-}
+
 
 interface LoginScreenProps {
   onSuccess: () => void;
@@ -38,22 +34,41 @@ export function LoginScreen({ onSuccess }: LoginScreenProps) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
+
     if (!user.trim() || !password) {
       setError("Kullanıcı adı ve şifre gerekli.");
       setLoading(false);
       return;
     }
-    if (checkCredentials(user.trim(), password)) {
-      setStoredAuth(true);
-      onSuccess();
-    } else {
-      setError("Kullanıcı adı veya şifre hatalı.");
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: user, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setStoredAuth(true);
+        // Store user info if needed, for now just flag
+        if (data.user) {
+          sessionStorage.setItem("sollenne_user", JSON.stringify(data.user));
+        }
+        onSuccess();
+      } else {
+        setError(data.error || "Giriş başarısız.");
+      }
+    } catch (err) {
+      setError("Bir hata oluştu.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (

@@ -1,0 +1,16 @@
+[
+  {
+    "id": "1",
+    "username": "admin",
+    "password": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
+    "role": "admin",
+    "createdAt": "2026-02-13T12:00:00.000Z"
+  },
+  {
+    "id": "1770990221274",
+    "username": "info@volkandemiroluk.com.tr",
+    "password": "f78bc0e251e988c992f32a631f666a955efd8a5192a45c3b467f63b4586e14b6",
+    "role": "user",
+    "createdAt": "2026-02-13T13:43:41.274Z"
+  }
+]

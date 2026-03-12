@@ -7,7 +7,8 @@
     "prebuild": "npx tsx scripts/export-transactions.ts",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "next lint",
+    "lint": "next lint"
   },
   "dependencies": {
     "html2canvas": "^1.4.1",

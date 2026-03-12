@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from "fs";
+import fs, { readdirSync, readFileSync } from "fs";
 import path from "path";
 import { parseNumber } from "./parse-number";
 import { parseDate } from "./parse-date";
@@ -6,7 +6,7 @@ import type { Transaction } from "@/types/transaction";
 
 const VERILER_DIR = "veriler";
 const CATEGORY_FILE_PREFIX = "ocak ayı rapor.XLS - ";
-const TUM_LIST_PATTERN = "tüm list";
+const TUM_LIST_PATTERN = /t[uü]m\s*list/i;
 
 export interface CsvRow {
   BELGE_NO: string;
@@ -26,9 +26,28 @@ export interface CsvRow {
  */
 export function getCategoryFromFilename(filename: string): string {
   const base = filename.replace(/\.csv$/i, "").trim();
+
+  // 1. Try hardcoded prefix (legacy)
   if (base.startsWith(CATEGORY_FILE_PREFIX)) {
     return base.slice(CATEGORY_FILE_PREFIX.length).trim();
   }
+
+  // 2. Try generic separators
+  // "ocak ayı rapor.XLS - ambalaj.csv" -> "ambalaj"
+  if (base.includes(" - ")) {
+    return base.split(" - ").pop()?.trim() || "";
+  }
+
+  // "ocak_ayi_rapor.XLS_-_ambalaj.csv" -> "ambalaj"
+  if (base.includes("_-_")) {
+    return base.split("_-_").pop()?.trim() || "";
+  }
+
+  // "ocak_ayi_rapor.XLS-ambalaj.csv" -> "ambalaj"
+  if (base.includes(".XLS-")) {
+    return base.split(".XLS-").pop()?.trim() || "";
+  }
+
   return "";
 }
 
@@ -69,9 +88,10 @@ function rowToTransaction(row: string[], headers: string[], category: string): T
   };
 
   const date = parseDate(get("TARIH"));
-  const total = parseNumber(get("TOPLAM_FIYAT"));
+  let total = parseNumber(get("TOPLAM_FIYAT"));
   const unitPrice = parseNumber(get("BR_FIYAT"));
   const qty = parseNumber(get("MIKTAR"));
+  if (total <= 0 && unitPrice > 0 && qty > 0) total = Math.round(unitPrice * qty * 100) / 100;
 
   if (!date) return null;
 
@@ -95,59 +115,94 @@ function rowToTransaction(row: string[], headers: string[], category: string): T
   };
 }
 
+function isTumListFile(fileName: string): boolean {
+  return TUM_LIST_PATTERN.test(fileName);
+}
+
 /**
- * Read all category CSV files from veriler/ and return merged transactions.
- * Skips "ocak rapor tüm list..csv" to avoid double-counting.
- * Deduplicates by belgeNo+stokKodu+product+date+total to keep first occurrence.
+ * Read all CSV files from veriler/ and return merged transactions.
+ * Per period folder: if "tüm list" file exists, use it as sole source (correct total).
+ * Otherwise use category files.
+ * Deduplicates by belgeNo+stokKodu+product+date+total.
  */
 export function loadTransactionsFromCsv(options?: {
   dataDir?: string;
   includeTumList?: boolean;
 }): Transaction[] {
   const dataDir = options?.dataDir ?? path.join(process.cwd(), VERILER_DIR);
-  const includeTumList = options?.includeTumList ?? false;
 
-  let files: string[];
-  try {
-    files = readdirSync(dataDir).filter((f) => f.toLowerCase().endsWith(".csv"));
-  } catch {
-    return [];
+  function getFilesRecursively(dir: string): string[] {
+    let results: string[] = [];
+    try {
+      const list = readdirSync(dir);
+      list.forEach((file) => {
+        const filePath = path.join(dir, file);
+        const stat = fs.statSync(filePath);
+        if (stat && stat.isDirectory()) {
+          results = results.concat(getFilesRecursively(filePath));
+        } else if (file.toLowerCase().endsWith(".csv")) {
+          results.push(filePath);
+        }
+      });
+    } catch {
+      return [];
+    }
+    return results;
+  }
+
+  const files = getFilesRecursively(dataDir);
+
+  // Group files by parent directory (period folder)
+  const filesByDir = new Map<string, string[]>();
+  for (const filePath of files) {
+    const dir = path.dirname(filePath);
+    if (!filesByDir.has(dir)) filesByDir.set(dir, []);
+    filesByDir.get(dir)!.push(filePath);
   }
 
   const seen = new Set<string>();
   const transactions: Transaction[] = [];
 
-  for (const file of files) {
-    if (!includeTumList && file.toLowerCase().includes(TUM_LIST_PATTERN)) continue;
+  for (const [dir, dirFiles] of filesByDir) {
+    const tumListFile = dirFiles.find((f) => isTumListFile(path.basename(f)));
+    const filesToLoad = tumListFile
+      ? [tumListFile]
+      : dirFiles.filter((f) => !isTumListFile(path.basename(f)));
 
-    const category = getCategoryFromFilename(file);
-    if (!category && !includeTumList) continue;
+    for (const filePath of filesToLoad) {
+      const fileName = path.basename(filePath);
+      const category = tumListFile ? "tümü" : getCategoryFromFilename(fileName);
+      if (!tumListFile && !category) continue;
 
-    const filePath = path.join(dataDir, file);
-    let content: string;
-    try {
-      content = readFileSync(filePath, "utf-8");
-    } catch {
-      continue;
-    }
+      let content: string;
+      try {
+        content = readFileSync(filePath, "utf-8");
+      } catch {
+        continue;
+      }
 
-    const rows = parseCsvContent(content);
-    if (rows.length < 2) continue;
+      const rows = parseCsvContent(content);
+      if (rows.length < 2) continue;
 
-    const headers = rows[0].map((h) => h.trim().replace(/^["']|["']$/g, ""));
-    const dataRows = rows.slice(1);
+      const headers = rows[0].map((h) => h.trim().replace(/^["']|["']$/g, ""));
+      const dataRows = rows.slice(1);
 
-    for (let i = 0; i < dataRows.length; i++) {
-      const row = dataRows[i];
-      const cat = category || "tümü";
-      const tx = rowToTransaction(row, headers, cat);
-      if (!tx || tx.total <= 0) continue;
+      for (let i = 0; i < dataRows.length; i++) {
+        const row = dataRows[i];
+        const cat = category || "tümü";
+        const tx = rowToTransaction(row, headers, cat);
+        if (!tx || tx.total <= 0) continue;
 
-      const key = `${tx.belgeNo ?? ""}|${tx.stokKodu ?? ""}|${tx.date}|${tx.product}|${tx.total}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-
-      transactions.push(tx);
+        // Tüm list: no dedup (user expects exact file sum). Category files: dedup to avoid double-count.
+        if (tumListFile) {
+          transactions.push(tx);
+        } else {
+          const key = `${tx.belgeNo ?? ""}|${tx.stokKodu ?? ""}|${tx.date}|${tx.product}|${tx.total}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          transactions.push(tx);
+        }
+      }
     }
   }
 

@@ -24,6 +24,28 @@ export const CATEGORY_LABELS: Record<string, string> = {
   "fason üretim": "Fason Üretim",
   "kargo giderleri": "Kargo Giderleri",
   tümü: "Tümü",
+
+  // Sanitized versions
+  // "sunta&mdf-kontra-pvc" is already defined above
+  // Our sanitization replaces '&' with nothing? regex [^a-zA-Z0-9.\-_] removes &.
+  // So "sunta&mdf" -> "suntamdf".
+  "suntamdf-kontra-pvc": "Sunta & MDF & PVC",
+  "metal_bolm.": "Metal Bölümü",
+  "metal_bolm": "Metal Bölümü",
+  "camayna_grubu": "Cam & Ayna", // & removed
+  "camayna": "Cam & Ayna",
+  "kumas": "Kumaş",
+  "sungerdoseme_malz": "Sünger & Döşeme",
+  "sungerdoseme": "Sünger & Döşeme",
+  "hirdavatelektrikcivata-vida": "Hırdavat & Elektrik",
+  "hirdavatelektrik": "Hırdavat & Elektrik",
+  "boya_grubu": "Boya Grubu",
+  "ambalaj_urunleri": "Ambalaj",
+  "statik_boya_isciligi": "Statik Boya İşçiliği",
+  "statik_boya": "Statik Boya İşçiliği",
+  "fab.bakimonarim-isg": "Fabrika Bakım & Onarım",
+  "fason_uretim": "Fason Üretim",
+  "kargo_giderleri": "Kargo Giderleri",
 };
 
 export function getCategoryLabel(slug: string): string {
