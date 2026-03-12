@@ -4,6 +4,23 @@ import { filterByRange } from "@/lib/filter-transactions";
 
 export const dynamic = 'force-dynamic'; // Disable caching for live updates
 
+async function getAllTransactions(request: NextRequest): Promise<{ date: string; category: string; supplier: string; product: string; qty: number; unit: string; unitPrice: number; total: number; belgeNo?: string; stokKodu?: string }[]> {
+  try {
+    return loadTransactionsFromCsv({ includeTumList: false });
+  } catch {
+    // Fallback for Cloudflare Workers (no fs): fetch static transactions.json
+    try {
+      const base = new URL(request.url).origin;
+      const res = await fetch(`${base}/transactions.json`);
+      if (res.ok) {
+        const data = await res.json();
+        return Array.isArray(data) ? data : [];
+      }
+    } catch { /* ignore */ }
+    return [];
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -13,8 +30,7 @@ export async function GET(request: NextRequest) {
     const compareStart = searchParams.get("compareStart");
     const compareEnd = searchParams.get("compareEnd");
 
-    // Read fresh data on every request
-    const allTransactions = loadTransactionsFromCsv({ includeTumList: false });
+    const allTransactions = await getAllTransactions(request);
 
     // Filter main dataset
     const current = filterByRange(allTransactions, startDate, endDate, categories);
