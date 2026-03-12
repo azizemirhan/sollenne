@@ -1,0 +1,3 @@
+module.exports=[27572,a=>{"use strict";var b=a.i(7997);function c({children:a}){return(0,b.jsx)("html",{lang:"tr",children:(0,b.jsx)("body",{style:{fontFamily:"'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"},children:a})})}a.s(["default",()=>c,"metadata",0,{title:"Sollenne Satın Alma Analizi",description:"Satın alma veri analizi ve görselleştirme dashboard"}])}];
+
+//# sourceMappingURL=src_app_layout_tsx_cc8184fa._.js.map
