@@ -11,7 +11,7 @@ function hashPassword(p: string) {
 const correctHash = hashPassword('admin');
 console.log('Expected hash for "admin":', correctHash);
 
-let users: { id: string; username: string; password: string; role: string }[] = [];
+let users: { id: string; username: string; password: string; role: string; createdAt?: string }[] = [];
 if (fs.existsSync(USERS_FILE)) {
   users = JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
   const admin = users.find((u) => u.username === 'admin');
@@ -27,7 +27,7 @@ if (fs.existsSync(USERS_FILE)) {
       password: correctHash,
       role: 'admin',
       createdAt: new Date().toISOString(),
-    } as never);
+    });
     fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), 'utf-8');
     console.log('Admin user created with password "admin".');
   }
