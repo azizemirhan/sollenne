@@ -339,18 +339,21 @@ export default function Dashboard() {
     setError(null);
     try {
       // Fetch ALL data (no params) to support local filtering
-      const apiRes = await fetch(`/api/transactions`).catch(() => null);
       let data: Transaction[] = [];
-
+      const apiRes = await fetch(`/api/transactions`).catch(() => null);
       if (apiRes?.ok) {
-        data = await apiRes.json();
-      } else {
+        const parsed = await apiRes.json();
+        if (Array.isArray(parsed) && parsed.length > 0) data = parsed;
+      }
+      // Fallback to static file when API fails or returns empty (e.g. Cloudflare Workers)
+      if (data.length === 0) {
         const staticRes = await fetch("/transactions.json");
         if (!staticRes.ok) throw new Error("Veri yüklenemedi");
-        data = await staticRes.json();
+        const parsed = await staticRes.json();
+        data = Array.isArray(parsed) ? parsed : [];
       }
 
-      setAllTransactions(Array.isArray(data) ? data : []);
+      setAllTransactions(data);
 
       setAvailableCategories((prev) => {
         const list = Array.isArray(data) ? data : [];
