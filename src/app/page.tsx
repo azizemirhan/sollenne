@@ -42,7 +42,7 @@ import {
   Users,
   Upload,
 } from "lucide-react";
-import { QUICK_REPORT_TITLE, QUICK_REPORT_CONTENT } from "@/constants/quickReport";
+import { getQuickReportTitle, getQuickReportContent } from "@/constants/quickReport";
 import { filterByRange } from "@/lib/filter-transactions";
 import { LoginScreen, getStoredAuth, setStoredAuth } from "@/components/auth/LoginScreen";
 import { UserManagement } from "@/components/admin/UserManagement";
@@ -200,6 +200,7 @@ const DATE_PRESETS = [
   },
   { label: "Ocak 2026", getRange: () => ({ start: "01.01.2026", end: "31.01.2026" }) },
   { label: "Şubat 2026", getRange: () => ({ start: "01.02.2026", end: "28.02.2026" }) },
+  { label: "Mart 2026", getRange: () => ({ start: "01.03.2026", end: "31.03.2026" }) },
 ];
 
 const COMPARE_OPTIONS = [
@@ -425,13 +426,16 @@ export default function Dashboard() {
     return { totalSpend, txCount, suppliers, products, avg, median };
   }, [transactions]);
 
-  /* ─── geçici: Şubat 2026 toplam harcama override ─── */
+  /* ─── geçici: aylık toplam harcama override'ları ─── */
   const isFeb2026 = (selectedMonths.length === 1 && selectedMonths[0] === "2026-02") ||
     (effectiveStartDate === "01.02.2026" && effectiveEndDate === "28.02.2026");
+  const isMar2026 = (selectedMonths.length === 1 && selectedMonths[0] === "2026-03") ||
+    (effectiveStartDate === "01.03.2026" && effectiveEndDate === "31.03.2026");
   const displayStats = useMemo(() => {
     if (isFeb2026) return { ...stats, totalSpend: 6504536 };
+    if (isMar2026) return { ...stats, totalSpend: 6815931.09 };
     return stats;
-  }, [stats, isFeb2026]);
+  }, [stats, isFeb2026, isMar2026]);
 
   // ... other derived stats depend on `transactions` which is now correct globally.
   // ... existing code ...
@@ -485,23 +489,33 @@ export default function Dashboard() {
   }, [transactions]);
 
   const weeklyData = useMemo(() => {
-    const weeks: Record<string, number> = {
-      "Hafta 1 (1-5 Ocak)": 0,
-      "Hafta 2 (6-12 Ocak)": 0,
-      "Hafta 3 (13-19 Ocak)": 0,
-      "Hafta 4 (20-26 Ocak)": 0,
-      "Hafta 5 (27-31 Ocak)": 0,
-    };
+    // Determine the month label from the active period
+    let monthLabel = "";
+    if (selectedMonths.length === 1) {
+      const [y, m] = selectedMonths[0].split("-");
+      monthLabel = getMonthName(parseInt(m) - 1);
+    } else if (effectiveStartDate) {
+      const parts = effectiveStartDate.split(".");
+      if (parts.length === 3) monthLabel = getMonthName(parseInt(parts[1], 10) - 1);
+    }
+
+    const w1 = `Hafta 1 (1-5${monthLabel ? " " + monthLabel : ""})`;
+    const w2 = `Hafta 2 (6-12${monthLabel ? " " + monthLabel : ""})`;
+    const w3 = `Hafta 3 (13-19${monthLabel ? " " + monthLabel : ""})`;
+    const w4 = `Hafta 4 (20-26${monthLabel ? " " + monthLabel : ""})`;
+    const w5 = `Hafta 5 (27-31${monthLabel ? " " + monthLabel : ""})`;
+
+    const weeks: Record<string, number> = { [w1]: 0, [w2]: 0, [w3]: 0, [w4]: 0, [w5]: 0 };
     transactions.forEach((t) => {
       const day = parseInt(t.date.split(".")[0], 10);
-      if (day <= 5) weeks["Hafta 1 (1-5 Ocak)"] += t.total;
-      else if (day <= 12) weeks["Hafta 2 (6-12 Ocak)"] += t.total;
-      else if (day <= 19) weeks["Hafta 3 (13-19 Ocak)"] += t.total;
-      else if (day <= 26) weeks["Hafta 4 (20-26 Ocak)"] += t.total;
-      else weeks["Hafta 5 (27-31 Ocak)"] += t.total;
+      if (day <= 5) weeks[w1] += t.total;
+      else if (day <= 12) weeks[w2] += t.total;
+      else if (day <= 19) weeks[w3] += t.total;
+      else if (day <= 26) weeks[w4] += t.total;
+      else weeks[w5] += t.total;
     });
     return Object.entries(weeks).map(([name, value]) => ({ name, value }));
-  }, [transactions]);
+  }, [transactions, selectedMonths, effectiveStartDate]);
 
   const dayOfWeekData = useMemo(() => {
     const dayNames = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
@@ -573,6 +587,16 @@ export default function Dashboard() {
     }
     return `${sd}.${sm}.${sy} - ${ed}.${em}.${ey} Satın Alma Analizi`;
   }, [startDate, endDate, selectedMonths]);
+
+  /* ─── active period key for quick report (YYYY-MM) ─── */
+  const activePeriodKey = useMemo(() => {
+    if (selectedMonths.length === 1) return selectedMonths[0];
+    if (effectiveStartDate) {
+      const parts = effectiveStartDate.split(".");
+      if (parts.length === 3) return `${parts[2]}-${parts[1].padStart(2, "0")}`;
+    }
+    return "2026-01";
+  }, [selectedMonths, effectiveStartDate]);
 
   const periodBadge = useMemo(() => {
     if (selectedMonths.length > 0) {
@@ -1275,7 +1299,7 @@ export default function Dashboard() {
             >
               <div className="dashboard-report-modal-header">
                 <h2 id="report-modal-title" style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "var(--primary)" }}>
-                  {QUICK_REPORT_TITLE}
+                  {getQuickReportTitle(activePeriodKey)}
                 </h2>
                 <button
                   type="button"
@@ -1298,7 +1322,7 @@ export default function Dashboard() {
                 </button>
               </div>
               <div className="dashboard-report-modal-body">
-                <pre className="report-pre">{QUICK_REPORT_CONTENT}</pre>
+                <pre className="report-pre">{getQuickReportContent(activePeriodKey)}</pre>
               </div>
             </div>
           </div>

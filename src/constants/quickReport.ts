@@ -1,9 +1,16 @@
 /**
- * Ocak 2026 Dönemi Satın Alma Stratejik Değerlendirme Raporu – modal içeriği
+ * Dönem bazlı hızlı rapor içerikleri
  */
-export const QUICK_REPORT_TITLE = "Ocak 2026 Satın Alma Stratejik Değerlendirme Raporu";
 
-export const QUICK_REPORT_CONTENT = `Ocak 2026 Dönemi Satın Alma Veri Analizi ve Stratejik Değerlendirme Raporu
+interface PeriodReport {
+  title: string;
+  content: string;
+}
+
+const REPORTS: Record<string, PeriodReport> = {
+  "2026-01": {
+    title: "Ocak 2026 Satın Alma Stratejik Değerlendirme Raporu",
+    content: `Ocak 2026 Dönemi Satın Alma Veri Analizi ve Stratejik Değerlendirme Raporu
 
 1. Yönetici Özeti (Executive Summary)
 
@@ -101,4 +108,95 @@ Aksiyon Önerileri:
 2. Stratejik Kaynak Planlaması: Panel grubu için Ateş Grup dışındaki üçüncü bir ana tedarikçiyle hacim taahhütlü "Yıllık Çerçeve Sözleşme" imzalanarak fiyat istikrarı sağlanmalıdır.
 3. Konsolide Tedarik ve C-Sınıfı Ürün Yönetimi: Hırdavat ve kırtasiye gibi düşük değerli (C-Sınıfı) ürünler için aylık toplu alım veya otomata dayalı tedarik modeline geçilerek işlem hacmi (ve idari maliyet) %40 oranında azaltılmalıdır.
 
-Ocak 2026 satın alma faaliyetleri, finansal açıdan yüksek hacimli ancak operasyonel açıdan riskli bir tablo çizmektedir. Yukarıdaki aksiyonların ivedilikle alınması, işletmenin kâr marjlarını korumak adına zorunludur.`;
+Ocak 2026 satın alma faaliyetleri, finansal açıdan yüksek hacimli ancak operasyonel açıdan riskli bir tablo çizmektedir. Yukarıdaki aksiyonların ivedilikle alınması, işletmenin kâr marjlarını korumak adına zorunludur.`,
+  },
+
+  "2026-03": {
+    title: "Mart 2026 Satın Alma Stratejik Değerlendirme Raporu",
+    content: `Mart 2026 Dönemi Satın Alma ve Malzeme Giriş Verilerinin Detaylı Finansal ve Operasyonel Analizi
+
+Toplam 407 farklı kalemde gerçekleşen işlemlerin analizine göre, şirketin bu ayki satın alma stratejisinde hammadde (MDF/Sunta, Kumaş) ve makine yatırımı/bakımı kalemleri öne çıkmaktadır.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 GENEL HARCAMA TRENDLERİ VE MALİYET MERKEZLERİ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Mart ayı içerisinde bütçenin en büyük kısmını Ahşap Grubu (Sunta, MDF, PVC), Tekstil (Kumaş, Deri) ve Makine Bakım/Yatırım kalemleri oluşturmaktadır.
+
+Öne Çıkan Ana Kategoriler:
+
+Orman Ürünleri (MDF/Sunta/Kontra):
+En yüksek hacimli satın almalar bu grupta yapılmıştır. Özellikle proje bazlı veya seri üretim için yüksek miktarda "MDFLAM Çöl Beji" alımı dikkat çekmektedir.
+
+Makine Bakım & Onarım:
+Fabrika genel makine bakımları kapsamında özellikle Lazer CNC hattı için yapılan tekil ve büyük ölçekli harcama, bu kategoriyi en yüksek maliyet merkezlerinden biri yapmıştır.
+
+Tekstil Ürünleri (Kumaş/Döşeme):
+Yüksek metrajlı suni deri ve muhtelif kumaş alımları, döşemeli ürün gruplarında ciddi bir üretim hacmine işaret etmektedir.
+
+Ambalaj Grubu:
+Sevk edilecek ürünlerin güvenliği için çok yüksek miktarlarda özel ebatlı baskılı levha, köşe karton ve gripin naylon alımı yapılmıştır.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏆 EN YÜKSEK MALİYETLİ TEDARİKÇİLER (İLK 5)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tedarikçi Adı                          Tedarik Edilen Ana Ürün Grubu
+ATEŞ GRUP ORMAN ÜRÜNLERİ A.Ş.         Ham MDF, MDFLAM, Sunta
+BODOR LASER TURKEY TİC.LTD.ŞTİ.       CNC Lazer Bakım / Makine Gideri
+EK AMBALAJ GIDA SAN. TİC.LTD.ŞTİ.     Karton Levha, Kutu, Köşe Kartonu
+PALA SUNİ DERİCİLİK SAN.LTD.ŞTİ.      Suni Deri (Günder Toskano) ve Kumaş
+BAŞKENT AY AMBALAJ SAN.TİC.LTD.ŞTİ.   Baskılı/Baskısız Gripin Naylon
+
+Not: Karataş Ayna ve Armada Orman Ürünleri de sırasıyla cam/ayna grubu ve PVC kenar bandı alımlarında yüksek hacimle bu listeyi takip etmektedir.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🛒 EN YÜKSEK TUTARLI TEKİL SATIN ALMA KALEMLERİ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+MDFLAM 2100x2800x18MM Çöl Beji (Yıldız VT_824)
+Farklı tarihlerde toplam 767 plaka alım yapılmıştır. Bu tek kalemin toplam maliyeti yaklaşık 1.369.000 TL'yi aşarak ayın en büyük hammadde gideri olmuştur.
+
+Lazer CNC Sac Kesim Makinesi (Bakım/Sarf)
+Tek kalemde 467.500 TL tutarında faturalandırılmıştır.
+
+Günder Toskano (Suni Deri/Kumaş)
+Metraj bazında en çok alınan kumaştır. Ay sonuna doğru yapılan tek bir 2.029 metrelik alımın tutarı 374.350 TL'dir.
+
+Baskılı / Baskısız Gripin Naylon Kağıtlı
+Ambalaj standartları gereği yüksek tonajlı alım yapılmış olup toplam maliyeti 190.000 TL bandını geçmiştir.
+
+Mercura 10mm Füme Rodajlı Temperli Cam (Çalışma & Toplantı Masası)
+Proje veya özel seri üretimi için alınan bu camların toplam maliyeti 165.000 TL'dir.
+
+Ofis Koltuk Ayakları (Manager / Elegant Krom Yıldız)
+Kuzey Makina'dan alınan ofis sandalyesi/koltuğu alt takımları toplam 175.500 TL tutmuştur.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💡 OPERASYONEL ÇIKTILAR VE OPTİMİZASYON FIRSATLARI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Sipariş Sıklığı:
+Hırdavat, elektrik ve boya (Yavuz Boya, Tamer Elektrik vb.) gruplarında ay içinde çok sık ve parçalı alımlar yapılmaktadır. Bu gruplarda aylık veya çeyreklik toplu alım sözleşmeleri yapılarak birim maliyetlerde avantaj sağlanabilir.
+
+Ambalaj Standardizasyonu:
+Kutu ve karton ambalajlarda "Ek Ambalaj", naylon grubunda "Başkent Ay" ile konsolide çalışıldığı görülüyor. Yüksek hacimli alımlar (Örn: 22.000 adetlik 3CM/9CM köşe kartonları) sipariş planlamasının doğru yapıldığını gösteriyor.
+
+Fason ve İşçilik Yönetimi:
+Toz boya işçiliğinin ağırlıklı olarak (Boyarsan) dışarıda yaptırıldığı görülüyor. Fason boya faturalarının sıklığı göz önüne alındığında, uzun vadede şirket içi bir boyahane hattının ROI (Yatırım Getirisi) hesaplaması masaya yatırılabilir.`,
+  },
+};
+
+/** Aktif döneme göre rapor başlığı döndürür */
+export function getQuickReportTitle(period: string): string {
+  return REPORTS[period]?.title ?? REPORTS["2026-01"].title;
+}
+
+/** Aktif döneme göre rapor içeriği döndürür */
+export function getQuickReportContent(period: string): string {
+  return REPORTS[period]?.content ?? REPORTS["2026-01"].content;
+}
+
+// Geriye dönük uyumluluk
+export const QUICK_REPORT_TITLE = REPORTS["2026-01"].title;
+export const QUICK_REPORT_CONTENT = REPORTS["2026-01"].content;

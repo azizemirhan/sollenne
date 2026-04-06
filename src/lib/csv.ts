@@ -6,7 +6,7 @@ import type { Transaction } from "@/types/transaction";
 
 const VERILER_DIR = "veriler";
 const CATEGORY_FILE_PREFIX = "ocak ayı rapor.XLS - ";
-const TUM_LIST_PATTERN = /t[uü]m\s*list/i;
+const TUM_LIST_PATTERN = /t[uü]m[\s_]*list/i;
 
 export interface CsvRow {
   BELGE_NO: string;
@@ -165,51 +165,87 @@ export function loadTransactionsFromCsv(options?: {
 
   for (const [dir, dirFiles] of filesByDir) {
     const tumListFile = dirFiles.find((f) => isTumListFile(path.basename(f)));
-    const filesToLoad = tumListFile
-      ? [tumListFile]
-      : dirFiles.filter((f) => !isTumListFile(path.basename(f)));
+    const categoryFiles = dirFiles.filter((f) => !isTumListFile(path.basename(f)));
 
-    for (const filePath of filesToLoad) {
-      const fileName = path.basename(filePath);
-      const category = tumListFile ? "tümü" : getCategoryFromFilename(fileName);
-      if (!tumListFile && !category) continue;
-
-      let content: string;
-      try {
-        content = readFileSync(filePath, "utf-8");
-      } catch {
-        continue;
+    if (tumListFile && categoryFiles.length > 0) {
+      // Both tüm list AND category files exist:
+      // Build a category lookup map from category files (belgeNo|stokKodu|date|qty|unitPrice → category)
+      // Then load tüm list rows with category enrichment from the map.
+      const categoryMap = new Map<string, string>();
+      for (const filePath of categoryFiles) {
+        const fileName = path.basename(filePath);
+        const cat = getCategoryFromFilename(fileName);
+        if (!cat) continue;
+        let content: string;
+        try { content = readFileSync(filePath, "utf-8"); } catch { continue; }
+        const rows = parseCsvContent(content);
+        if (rows.length < 2) continue;
+        const headers = rows[0].map((h) => h.trim().replace(/^["']|["']$/g, ""));
+        for (const row of rows.slice(1)) {
+          const tx = rowToTransaction(row, headers, cat);
+          if (!tx || tx.total <= 0) continue;
+          const key = `${tx.belgeNo ?? ""}|${tx.stokKodu ?? ""}|${tx.date}|${tx.qty}|${tx.unitPrice}`;
+          if (!categoryMap.has(key)) categoryMap.set(key, cat);
+        }
       }
 
+      // Load tüm list rows, assign category from map or fall back to "tümü"
+      let content: string;
+      try { content = readFileSync(tumListFile, "utf-8"); } catch { continue; }
       const rows = parseCsvContent(content);
       if (rows.length < 2) continue;
-
       const headers = rows[0].map((h) => h.trim().replace(/^["']|["']$/g, ""));
-      const dataRows = rows.slice(1);
-
-      for (let i = 0; i < dataRows.length; i++) {
-        const row = dataRows[i];
-        const cat = category || "tümü";
-        const tx = rowToTransaction(row, headers, cat);
+      for (const row of rows.slice(1)) {
+        const tx = rowToTransaction(row, headers, "tümü");
         if (!tx || tx.total <= 0) continue;
+        const lookupKey = `${tx.belgeNo ?? ""}|${tx.stokKodu ?? ""}|${tx.date}|${tx.qty}|${tx.unitPrice}`;
+        tx.category = categoryMap.get(lookupKey) ?? "tümü";
+        transactions.push(tx);
+      }
+    } else {
+      // Only one source available: use tüm list or category files
+      const filesToLoad = tumListFile
+        ? [tumListFile]
+        : categoryFiles;
 
-        // Tüm list: no dedup (user expects exact file sum). Category files: dedup to avoid double-count.
-        if (tumListFile) {
-          transactions.push(tx);
-        } else {
-          const key = `${tx.belgeNo ?? ""}|${tx.stokKodu ?? ""}|${tx.date}|${tx.product}|${tx.total}`;
-          if (seen.has(key)) continue;
-          seen.add(key);
-          transactions.push(tx);
+      for (const filePath of filesToLoad) {
+        const fileName = path.basename(filePath);
+        const category = tumListFile ? "tümü" : getCategoryFromFilename(fileName);
+        if (!tumListFile && !category) continue;
+
+        let content: string;
+        try { content = readFileSync(filePath, "utf-8"); } catch { continue; }
+
+        const rows = parseCsvContent(content);
+        if (rows.length < 2) continue;
+
+        const headers = rows[0].map((h) => h.trim().replace(/^["']|["']$/g, ""));
+        const dataRows = rows.slice(1);
+
+        for (let i = 0; i < dataRows.length; i++) {
+          const row = dataRows[i];
+          const cat = category || "tümü";
+          const tx = rowToTransaction(row, headers, cat);
+          if (!tx || tx.total <= 0) continue;
+
+          if (tumListFile) {
+            transactions.push(tx);
+          } else {
+            const key = `${tx.belgeNo ?? ""}|${tx.stokKodu ?? ""}|${tx.date}|${tx.product}|${tx.total}|${tx.qty}|${tx.unitPrice}`;
+            if (seen.has(key)) continue;
+            seen.add(key);
+            transactions.push(tx);
+          }
         }
       }
     }
   }
 
   return transactions.sort((a, b) => {
-    const [da, ma] = a.date.split(".");
-    const [db, mb] = b.date.split(".");
-    const cmp = parseInt(ma + da, 10) - parseInt(mb + db, 10);
+    const [da, ma, ya] = a.date.split(".");
+    const [db, mb, yb] = b.date.split(".");
+    const cmp = parseInt(ya + ma.padStart(2, "0") + da.padStart(2, "0"), 10) -
+                parseInt(yb + mb.padStart(2, "0") + db.padStart(2, "0"), 10);
     return cmp !== 0 ? cmp : a.total - b.total;
   });
 }
