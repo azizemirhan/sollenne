@@ -10,8 +10,8 @@ export interface User {
   createdAt: string;
 }
 
-// Fallback for Cloudflare Workers (no filesystem) - SHA256 of "admin"
-const FALLBACK_ADMIN_HASH = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918';
+// Fallback for Cloudflare Workers (no filesystem)
+const FALLBACK_ADMIN_HASH = '859a66c9441c9e5e480c06866ea741083df4e3b5b0e874f64029d3743f30555a';
 const FALLBACK_USERS: User[] = [
   { id: '1', username: 'admin', password: FALLBACK_ADMIN_HASH, role: 'admin', createdAt: '2026-01-01T00:00:00.000Z' },
 ];
